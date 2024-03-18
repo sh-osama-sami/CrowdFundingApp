@@ -1,0 +1,19 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block 'content' %}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h1> Login </h1>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{form}}
+                <button type="submit" class="btn btn-success">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script
+   src="{% static 'books/js/script.js' %}"></script>
+{% endblock %}
