@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Register - CrowdFunding WebApp{% endblock %}
+{% block content %}
+  <h2>Register</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Register</button>
+  </form>
+{% endblock %}
