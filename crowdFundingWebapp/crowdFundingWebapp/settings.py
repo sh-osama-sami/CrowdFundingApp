@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'crowdFundingWebapp',
     'authentication',
 ]
 
@@ -75,8 +78,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
         'NAME': 'crowdfundingdb',
-        'USER': 'root',
-        'PASSWORD': 'meme1357',  # change based on your mysql password
+        'USER': 'alaamoh',
+        'PASSWORD': 'iti123456789_',  # change based on your mysql password
         'HOST': 'localhost',
         'PORT': '3306',
     }
