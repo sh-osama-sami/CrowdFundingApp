@@ -1,5 +1,5 @@
 from django.urls import path
-from Project.views import *
+from project.views import *
 
 urlpatterns = [
     path('create_category/', create_category, name='create_category'),
