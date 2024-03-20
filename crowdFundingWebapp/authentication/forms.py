@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.contrib.auth.hashers import make_password
 
 
 # registration form that inherits from UserCreationForm
@@ -27,3 +28,4 @@ class RegistrationForm(UserCreationForm):
         if not mobile_phone.startswith('01') or len(mobile_phone) != 11:
             raise ValidationError('Enter a valid Egyptian phone number.')
         return mobile_phone
+
