@@ -13,7 +13,7 @@ class RegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'mobile_phone', 'password1', 'password2', 'profile_picture')
+        fields = ('first_name', 'last_name', 'email', 'username', 'mobile_phone', 'password1', 'password2', 'profile_picture')
 
     # validation for email uniqueness
     def clean_email(self):
