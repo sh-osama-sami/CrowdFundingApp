@@ -1,7 +1,4 @@
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .forms import RegistrationForm
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
@@ -11,12 +8,10 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
-
 def profile(request):
     # url = reverse('projects.index')
     # return redirect(url)
-    return HttpResponse(" login successfully")
-
+    return HttpResponse(" login successfulyy")
 
 
 
