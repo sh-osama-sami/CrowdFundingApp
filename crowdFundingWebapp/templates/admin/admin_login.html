@@ -1,10 +1,11 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Register - CrowdFunding WebApp{% endblock %}
-{% block 'content' %}
-  <h2>Register</h2>
+{% block title %}Administration - CrowdFunding WebApp{% endblock %}
+{% block content %}
+  <h2>Admin</h2>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Register</button>
+    <button type="submit">Login</button>
   </form>
 {% endblock %}
+

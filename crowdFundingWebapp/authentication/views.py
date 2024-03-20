@@ -3,6 +3,21 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import RegistrationForm
 from django.core.mail import send_mail
+from django.shortcuts import render, redirect, reverse
+from django.contrib import messages
+from .forms import RegistrationForm
+from django.http import HttpResponse
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+
+
+def profile(request):
+    # url = reverse('projects.index')
+    # return redirect(url)
+    return HttpResponse(" login successfully")
+
+
 
 
 # render and handle registration form
@@ -15,8 +30,8 @@ def register(request):
             user.is_active = False
             user.save()
             verification_email(request, user)
-            messages.success(request, 'Registration successful. Please login.')
-            return redirect('login')  # Redirection to the login page after successful registration
+            return HttpResponse('A verification email has been sent to your email address. Please verify your email.')
+
     else:
         form = RegistrationForm()
     return render(request, 'registration/register.html', {'form': form})
@@ -38,3 +53,26 @@ def verify_email(request, user_id):
     user.save()
     messages.success(request, 'Your email has been verified. Please login.')
     return redirect('login')
+
+
+def admin_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('admin_home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'admin/admin_login.html', {'form': form})
+
+
+@login_required
+def admin_home(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        return render(request, 'admin/admin_home.html')
+    else:
+        return redirect('admin_login')
