@@ -78,8 +78,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
         'NAME': 'crowdfundingdb',
-        'USER': 'alaamoh',
-        'PASSWORD': 'iti123456789_',  # change based on your mysql password
+        'USER': 'root',
+        'PASSWORD': 'meme1357',  # change based on your mysql password
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -126,3 +126,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'sherry.osama.sami@gmail.com'
+EMAIL_HOST_PASSWORD = 'jjzy cffb xxpj saeo '
+EMAIL_USE_OAUTH2 = True
+EMAIL_OAUTH2_CLIENT_ID = '522182617078-72gesoelqb0hrrq834l2i5napocutaiu.apps.googleusercontent.com'  # OAuth2 client ID from Google Developers Console
+EMAIL_OAUTH2_CLIENT_SECRET = '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'  # OAuth2 client secret from Google Developers Console
