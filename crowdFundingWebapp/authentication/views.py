@@ -8,11 +8,11 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
+
 def profile(request):
     # url = reverse('projects.index')
     # return redirect(url)
     return HttpResponse(" login successfulyy")
-
 
 
 # render and handle registration form
