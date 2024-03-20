@@ -2,16 +2,14 @@ from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
 from .forms import RegistrationForm
 from django.http import HttpResponse
-
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 
 def profile(request):
     # url = reverse('projects.index')
     # return redirect(url)
     return HttpResponse(" login successfulyy")
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
-
 
 # render and handle registration form
 def register(request):
