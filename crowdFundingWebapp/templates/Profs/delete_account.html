@@ -1,0 +1,11 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Delete Account{% endblock %}
+
+{% block 'content' %}
+<h2>Delete Account</h2>
+<p>Are you sure you want to delete your account? This action cannot be undone.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, Delete My Account</button>
+</form>
+{% endblock %}

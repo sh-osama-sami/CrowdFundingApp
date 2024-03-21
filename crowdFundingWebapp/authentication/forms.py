@@ -1,6 +1,7 @@
+from django.utils import timezone
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from .models import CustomUser
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
 
@@ -13,20 +14,48 @@ class RegistrationForm(UserCreationForm):
     profile_picture = forms.ImageField(required=False)
 
     class Meta:
-        model = User
-        fields = ('first_name', 'last_name', 'username', 'email', 'username', 'mobile_phone', 'password1', 'password2', 'profile_picture')
+        model = CustomUser
+        fields = ('first_name', 'last_name', 'username', 'email', 'mobile_phone', 'password1', 'password2',
+                  'profile_picture')
 
     # validation for email uniqueness
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
+        if CustomUser.objects.filter(email=email).exists():
             raise ValidationError('This email address is already in use.')
         return email
 
     # validation for mobile phone format
     def clean_mobile_phone(self):
         mobile_phone = self.cleaned_data.get('mobile_phone')
-        if not mobile_phone.startswith('01') or len(mobile_phone) != 11:
-            raise ValidationError('Enter a valid Egyptian phone number.')
+        # Validate against Egyptian phone number format
+        valid_prefixes = ['011', '010', '012', '015']
+        if not any(mobile_phone.startswith(prefix) for prefix in valid_prefixes) or len(mobile_phone) != 11:
+            raise ValidationError('Please enter a valid Egyptian phone number starting with 011, 010, 012, or 015.')
         return mobile_phone
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'mobile_phone', 'profile_picture', 'birthdate', 'facebook_profile',
+                  'country']
+
+    def clean_mobile_phone(self):
+        mobile_phone = self.cleaned_data.get('mobile_phone')
+        # Validate against Egyptian phone number format
+        valid_prefixes = ['011', '010', '012', '015']
+        if not any(mobile_phone.startswith(prefix) for prefix in valid_prefixes) or len(mobile_phone) != 11:
+            raise ValidationError('Please enter a valid Egyptian phone number starting with 011, 010, 012, or 015.')
+        return mobile_phone
+
+    def clean_birthdate(self):
+        birthdate = self.cleaned_data.get('birthdate')
+        # Ensure birthdate is not in the future
+        if birthdate and birthdate > timezone.now().date():
+            raise ValidationError('Please enter a valid birthdate.')
+        return birthdate
+
+
+
 
