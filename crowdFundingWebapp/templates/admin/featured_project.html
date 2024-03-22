@@ -1,0 +1,83 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Administration - CrowdFunding WebApp{% endblock %}
+{% block 'content' %}
+<div class="container mt-4">
+    <div class="row">
+        {% for project in projects %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div id="carousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for image in project.images.all %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img src="{{ image.url }}" class="d-block w-100" alt="Project Image">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ project.title }}</h5>
+                    <p class="card-text">Author: {{ project.creator }}</p>
+                    <p class="card-text">Current Amount: {{ project.current_amount }}</p>
+                    <p class="card-text">Total Target: {{ project.total_target }}</p>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-transparent favorite-btn {% if project.is_featured %}text-danger{% endif %}" data-project-id="{{ project.id }}" data-update-url="{% url 'update_featured_status' project.id %}" style="font-size: 50px;">
+                            {% if project.is_featured %}
+                            &#9733; 
+                            {% else %}
+                            &#9734; 
+                            {% endif %}
+                        </button>
+                        <span class="ml-2 {% if not project.is_featured %}d-inline{% else %}d-none{% endif %}">Mark as featured</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.favorite-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                this.classList.toggle('text-danger');
+
+                const markAsFeaturedText = this.parentElement.querySelector('span');
+                if (markAsFeaturedText) {
+                    markAsFeaturedText.classList.toggle('d-none');
+                }
+                const url = this.getAttribute('data-update-url');
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}' 
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data); 
+                })
+                .catch(error => {
+                    console.error('There was an error!', error); 
+                });
+            });
+        });
+    });
+</script>
+
+{% endblock %}
