@@ -21,16 +21,35 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            # form.save()
             user = form.save(commit=False)
             user.is_active = False
             user.save()
             verification_email(request, user)
-            return HttpResponse('A verification email has been sent to your email address. Please verify your email.')
+            messages.success(request,
+                             'A verification email has been sent to your email address. Please verify your email.')
+            return redirect('register')  # Redirect to the same page to display the message
 
     else:
         form = RegistrationForm()
     return render(request, 'registration/register.html', {'form': form})
+
+
+# check if the user has activated his account before login
+def signin(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None and user.is_active:
+                login(request, user)
+                return redirect('home')
+            else:
+                messages.error(request, 'Your account is not activated. Please verify your email.')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
 
 
 def verification_email(request, user):
@@ -71,7 +90,7 @@ def admin_home(request):
     if request.user.is_authenticated and request.user.is_superuser:
         return render(request, 'admin/admin_home.html')
     else:
-        return redirect('admin_login')
+        return redirect('administration') #changed from admin_login beacuse it returns no such url or view
 
 
 @login_required

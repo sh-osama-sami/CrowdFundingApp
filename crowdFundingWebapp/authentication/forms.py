@@ -11,7 +11,7 @@ class RegistrationForm(UserCreationForm):
     email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
     username = forms.CharField(max_length=30, help_text='Required. Enter a valid username.')
     mobile_phone = forms.CharField(max_length=11, help_text='Required. Enter a valid Egyptian phone number.')
-    profile_picture = forms.ImageField(required=False)
+    profile_picture = forms.ImageField(required=True)
 
     class Meta:
         model = CustomUser

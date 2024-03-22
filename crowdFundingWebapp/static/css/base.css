@@ -1,7 +1,9 @@
 /* base.css */
 
 .navbar {
-    border-radius: 60px; /* rounded corners */
+    border-radius: 60px;
+    position: sticky;
+    top: 0;
 }
 .navbar-brand {
     margin-left: auto;
@@ -38,8 +40,9 @@ body {
     min-height: 100vh;
 }
 
-main {
+.container {
     flex: 1;
+    margin-bottom: 100px;
 }
 
 footer {
