@@ -34,6 +34,9 @@ class ProjectImage(models.Model):
     project = models.ForeignKey(Project, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='project_images/')
 
+    @property
+    def image_url(self):
+        return f'/media/{self.image}'
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)

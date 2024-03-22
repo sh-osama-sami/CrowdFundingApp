@@ -1,0 +1,11 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Delete Project{% endblock %}
+
+{% block 'content' %}
+  <h2>Delete Project</h2>
+  <p>Are you sure you want to delete '{{ project.title }}'?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Delete</button>
+  </form>
+{% endblock %}

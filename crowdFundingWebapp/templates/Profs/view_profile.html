@@ -12,6 +12,7 @@
   <p><strong>Country:</strong> {{ user.country }}</p>
   <img src="{{ user.profile_picture.url }}" alt="Profile Picture" width="200">
 
+  <a href="{% url 'user_projects' %}" class="btn btn-primary">Show Projects</a>
   <a href="{% url 'edit_profile' user.id  %}" class="btn btn-primary">Edit Profile</a>
   <a href="{% url 'delete_account' user.id %}" class="btn btn-danger">Delete Account</a>
 {% endblock %}
