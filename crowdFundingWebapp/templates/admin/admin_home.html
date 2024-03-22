@@ -1,16 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Home</title>
-</head>
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Administration - CrowdFunding WebApp{% endblock %}
+{% block 'content' %}
 <body>
-    <nav>
-        <ul>
-            <li><a href="{% url 'create_category' %}">Create Category</a></li>
-            <li><a href="{% url 'select_featured_projects' %}">Featured Projects</a></li>
-        </ul>
-    </nav>
     <h1>Welcome, Admin!</h1>
 </body>
-</html>
+{% endblock %}
