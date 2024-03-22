@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .forms import CategoryForm
 from django.contrib.auth.decorators import login_required
+from .models import Project
 
 
 # Create your views here.
@@ -29,3 +30,9 @@ def select_featured_projects(request):
 #     # categories = Category.objects.all()
 #     # return render(request, 'admin/list_categories.html', {'categories': categories})
 #     print(1)
+
+
+
+def project_list(request):
+    projects = Project.objects.all()
+    return render(request, 'Project/project_list.html', {'projects': projects})

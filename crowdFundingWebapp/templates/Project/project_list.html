@@ -1,0 +1,29 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Project List{% endblock %}
+{% block content %}
+    <h1>All Projects</h1>
+    <!-- Debugging Output -->
+    {% if projects %}
+        <div class="row">
+            {% for project in projects %}
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ project.title }}</h5>
+                            <p class="card-text"><strong>Category:</strong> {{ project.category }}</p>
+                            <p class="card-text"><strong>Description:</strong> {{ project.details }}</p>
+                            <p class="card-text"><strong>Creator:</strong> {{ project.creator }}</p>
+                            <p class="card-text"><strong>Current Amount:</strong> ${{ project.current_amount }}</p>
+                            <p class="card-text"><strong>Total Target:</strong> ${{ project.total_target }}</p>
+                            <p class="card-text"><strong>Start Time:</strong> {{ project.start_time }}</p>
+                            <p class="card-text"><strong>End Time:</strong> {{ project.end_time }}</p>
+                            <!-- Add more fields as needed -->
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No projects available</p>
+    {% endif %}
+{% endblock %}
