@@ -30,12 +30,22 @@
                 <div class="popup-form">
                     <form method="post" id="categoryForm">
                         {% csrf_token %}
-                        {{ form.as_p }}
+                        {{ form.non_field_errors }}
+                        <div class="form-group">
+                            {{ form.name.label_tag }}
+                            {{ form.name }}
+                            {{ form.name.errors }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            {{ form.description.errors }}
+                        </div>
                         <button type="submit" class="btn btn-primary">Create Category</button>
                     </form>
                 </div>
             </div>
-        </div>
+        </div>        
     </div>
 </div>
 
@@ -78,45 +88,54 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleButton = document.getElementById('toggleForm');
-    const categoryFormContainer = document.getElementById('categoryFormContainer');
-
-    toggleButton.addEventListener('click', function() {
-        if (categoryFormContainer.style.display === 'none') {
-            categoryFormContainer.style.display = 'block';
-            document.body.classList.add('popup-open');
-        } else {
-            categoryFormContainer.style.display = 'none';
-            document.body.classList.remove('popup-open');
-        }
-    });
-
-    const searchInput = document.getElementById('searchInput');
-    const categoryList = document.getElementById('categoryList');
-
-    searchInput.addEventListener('input', function() {
-        const searchText = searchInput.value.toLowerCase();
-        const categories = categoryList.querySelectorAll('.category-card');
-        
-        categories.forEach(function(category) {
-            const categoryName = category.querySelector('.card-title').textContent.toLowerCase();
-            const categoryDescription = category.querySelector('.card-text').textContent.toLowerCase();
-
-            if (categoryName.includes(searchText) || categoryDescription.includes(searchText)) {
-                category.style.display = 'block';
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleButton = document.getElementById('toggleForm');
+        const categoryFormContainer = document.getElementById('categoryFormContainer');
+    
+        toggleButton.addEventListener('click', function(event) {
+            toggleFormVisibility();
+            event.stopPropagation(); // Prevent the click event from bubbling up
+        });
+    
+        const toggleFormVisibility = function() {
+            if (categoryFormContainer.style.display === 'none') {
+                categoryFormContainer.style.display = 'block';
+                document.body.classList.add('popup-open');
             } else {
-                category.style.display = 'none';
+                categoryFormContainer.style.display = 'none';
+                document.body.classList.remove('popup-open');
+            }
+        };
+    
+        const searchInput = document.getElementById('searchInput');
+        const categoryList = document.getElementById('categoryList');
+    
+        searchInput.addEventListener('input', function() {
+            const searchText = searchInput.value.toLowerCase();
+            const categories = categoryList.querySelectorAll('.category-card');
+    
+            categories.forEach(function(category) {
+                const categoryName = category.querySelector('.card-title').textContent.toLowerCase();
+                const categoryDescription = category.querySelector('.card-text').textContent.toLowerCase();
+    
+                if (categoryName.includes(searchText) || categoryDescription.includes(searchText)) {
+                    category.style.display = 'block';
+                } else {
+                    category.style.display = 'none';
+                }
+            });
+        });
+    
+        document.addEventListener('click', function(event) {
+            if (!categoryFormContainer.contains(event.target) && !toggleButton.contains(event.target)) {
+                categoryFormContainer.style.display = 'none';
+                document.body.classList.remove('popup-open');
             }
         });
-    });
-
-     document.addEventListener('click', function(event) {
-        if (!categoryFormContainer.contains(event.target) && !toggleButton.contains(event.target)) {
-            categoryFormContainer.style.display = 'none';
-            document.body.classList.remove('popup-open');
+    
+        if (document.querySelectorAll('.errorlist').length > 0) {
+            toggleFormVisibility();
         }
     });
-});
-</script>
-{% endblock %}
+    </script> 
+{% endblock %} 
