@@ -16,6 +16,7 @@
     <p>No profile picture available</p>
   {% endif %}
 
+  <a href="{% url 'user_projects' %}" class="btn btn-primary">Show Projects</a>
   <a href="{% url 'edit_profile' user.id  %}" class="btn btn-primary">Edit Profile</a>
   <a href="{% url 'delete_account' user.id %}" class="btn btn-danger">Delete Account</a>
 {% endblock %}

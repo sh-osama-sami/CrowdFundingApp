@@ -2,7 +2,6 @@ from django.db import models
 from authentication.models import CustomUser
 
 
-# Create your models here.
 class Category(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=False, null=False)
@@ -35,14 +34,13 @@ class ProjectImage(models.Model):
     project = models.ForeignKey(Project, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='project_images/')
 
+    @property
+    def image_url(self):
+        return f'/media/{self.image}'
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)
+    projects = models.ManyToManyField(Project, related_name='tags')
 
     def __str__(self):
         return self.name
-
-
-class ProjectTag(models.Model):
-    project = models.ForeignKey(Project, related_name='tags', on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)

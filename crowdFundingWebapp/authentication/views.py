@@ -12,6 +12,7 @@ from .models import CustomUser
 @login_required
 def profile(request):
     user_id = request.user.id
+
     return redirect('view_profile', user_id=user_id)
 
 

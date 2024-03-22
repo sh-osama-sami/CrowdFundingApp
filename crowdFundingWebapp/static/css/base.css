@@ -1,0 +1,52 @@
+/* base.css */
+
+.navbar {
+    border-radius: 60px; /* rounded corners */
+}
+.navbar-brand {
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-item .nav-link {
+    transition: all 0.3s ease;
+}
+.navbar-nav .nav-item .nav-link:hover {
+    border-radius: 50px;
+    background-color: lightgreen;
+}
+.navbar-brand {
+    margin-top: -20px;
+    font-family: 'Pacifico', cursive;
+    color: green;
+}
+.navbar-nav .nav-item {
+    padding: 0 10px;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #e78696;
+    padding: 10px 0;
+    text-align: center;
+}

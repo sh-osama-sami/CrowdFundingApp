@@ -1,0 +1,30 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Your Projects{% endblock %}
+
+{% block 'content' %}
+  <h2>Your Projects</h2>
+  <div class="row">
+    {% for project in projects %}
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <img src="{{ project.images.first.image.url }}" class="card-img-top" alt="Project Image">
+          <div class="card-body">
+            <h5 class="card-title">{{ project.title }}</h5>
+            <p class="card-text">{{ project.details }}</p>
+            <a href="{% url 'project_detail' project_id=project.id %}" class="btn btn-primary">View Details</a>
+            <a href="{% url 'update_project' project_id=project.id %}" class="btn btn-secondary">Edit</a>
+            <a href="{% url 'delete_project' project_id=project.id %}" class="btn btn-danger">Delete</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col">
+        <div class="alert alert-info" role="alert">
+          No projects found.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+<a href="{% url 'create_project' %}" class="btn btn-primary">Create a Project</a>
+{% endblock %}
+
