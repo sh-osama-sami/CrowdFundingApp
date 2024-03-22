@@ -1,7 +1,18 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 {% block title %}Home{% endblock %}
 {% block 'content' %}
 
 
 
+<link rel="stylesheet" href="{% static 'css/home/home.css' %}">
+
+<div>
+    <h1 class="text-center">Your home </h1>
+    <h1 class="text-center" > for help</h1>
+</div>
+
+<button class="start-project">Start a project</button>
+
+<div id="slider-container" class="slider-container"></div>
 {% endblock %}
