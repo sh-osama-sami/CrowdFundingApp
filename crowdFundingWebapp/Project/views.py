@@ -1,6 +1,6 @@
 from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Project, ProjectImage, Tag
+from .models import Category, Project, ProjectImage, Tag
 from django.contrib.auth.decorators import login_required
 from authentication.models import CustomUser
 
@@ -8,14 +8,18 @@ from authentication.models import CustomUser
 # Create your views here.
 @login_required
 def create_category(request):
+    categories = Category.objects.all()
+    form = CategoryForm()
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('category_list')
-    else:
-        form = CategoryForm()
-    return render(request, 'admin/create_category.html', {'form': form})
+            category_name = form.cleaned_data['name']
+            if Category.objects.filter(name=category_name).exists():
+                form.add_error('name', 'Category with this name already exists.')
+            else:
+                form.save()
+                return redirect('create_category')
+    return render(request, 'admin/create_category.html', {'categories': categories, 'form': form})
 
 
 @login_required
