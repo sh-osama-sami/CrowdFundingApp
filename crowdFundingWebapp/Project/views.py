@@ -19,6 +19,8 @@ def create_category(request):
             else:
                 form.save()
                 return redirect('create_category')
+    else:
+        form = CategoryForm()
     return render(request, 'admin/create_category.html', {'categories': categories, 'form': form})
 
 
