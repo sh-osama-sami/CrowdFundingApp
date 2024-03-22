@@ -71,7 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'crowdFundingWebapp.wsgi.application'
-
+LOGIN_URL = '/authentication/login/'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
