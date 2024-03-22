@@ -3,7 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category, Project, ProjectImage, Tag
 from django.contrib.auth.decorators import login_required
 from authentication.models import CustomUser
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 @login_required
@@ -26,7 +27,21 @@ def create_category(request):
 
 @login_required
 def select_featured_projects(request):
-    print(1)
+    projects = Project.objects.all()
+    return render(request, 'admin/featured_project.html', {'projects': projects})
+
+@csrf_exempt  
+def update_featured_status(request, project_id):
+    if request.method == 'POST':
+        try:
+            project = Project.objects.get(pk=project_id)
+            project.is_featured = not project.is_featured
+            project.save()
+            return JsonResponse({'success': True})
+        except Project.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Project does not exist'}, status=404)
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
 
 
 # def list_latest_featured_projects(request):
