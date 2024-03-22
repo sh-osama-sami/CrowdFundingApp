@@ -136,3 +136,9 @@ def user_projects(request):
     projects = Project.objects.filter(creator=request.user)
     return render(request, 'projects/user_projects.html', {'projects': projects})
 
+def home(request):
+    return render(request, 'Home/home.html')
+
+
+def search(request):
+    return render(request, 'Home/search.html')
