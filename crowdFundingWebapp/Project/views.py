@@ -37,6 +37,7 @@ def select_featured_projects(request):
 
 def project_list(request):
     projects = Project.objects.all()
+    print("Number of projects:", len(projects))  # Debugging line to print the number of projects
     return render(request, 'Project/project_list.html', {'projects': projects})
 #========================================================================================================================
 # CRUD operations
