@@ -1,10 +1,12 @@
 from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Category, Project, ProjectImage, Tag 
+from .models import Category, Project, ProjectImage, Tag , Report
 from django.contrib.auth.decorators import login_required
 from authentication.models import CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Count
+from django.contrib.auth import get_user_model
 
 # Create your views here.
 
@@ -67,6 +69,10 @@ def project_details(request, pk):
     similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(pk=pk).distinct()[:4]
     is_reported = project.is_reported  # Check if the project is reported
 
+    # Get the count of reports for the project
+    # report_count = Report.objects.filter(project=project).count()
+    report_count = project.reports.count()
+    
     if request.method == 'POST' and request.user.is_authenticated:
         comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
@@ -76,27 +82,27 @@ def project_details(request, pk):
             comment.project = project
             comment.save()
             return redirect('project_details', pk=pk)
-
     else:
         comment_form = CommentForm()
 
-    return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects, 'comment_form': comment_form, 'is_reported': is_reported})
-
+    return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects, 'comment_form': comment_form, 'is_reported': is_reported, 'report_count': report_count})
 
 @login_required  # Add this decorator to allow reporting only for logged-in users
 def report_project(request, pk):
-    project = get_object_or_404(Project, id=pk)
+    project = get_object_or_404(Project, pk=pk)
     if request.method == 'POST':
         form = ReportForm(request.POST)
         if form.is_valid():
+            user = CustomUser.objects.get(pk=request.user.pk)  # Use CustomUser instead of User
             reason = form.cleaned_data['reason']
-            project.is_reported = True
-            project.reason_for_report = reason
+            report = Report(project=project, user=user, reason=reason)
+            report.save()
+            project.is_reported = True  # Update project status if needed
             project.save()
-            return redirect('project_details', pk=project.id)
+            return redirect('project_details', pk=pk)
     else:
         form = ReportForm()
-    return render(request, 'Project/project_details.html', {'project': project, 'form': form})
+    return render(request, 'Project/report_project.html', {'form': form})
 
 #========================================================================================================================
 # CRUD operations
