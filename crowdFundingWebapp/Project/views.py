@@ -32,7 +32,9 @@ def create_category(request):
 @login_required
 def select_featured_projects(request):
     projects = Project.objects.all()
-    return render(request, 'admin/featured_project.html', {'projects': projects})
+    categories = Category.objects.all()
+    tags = Tag.objects.all()
+    return render(request, 'admin/featured_project.html', {'projects': projects , 'categories': categories ,'tags': tags})
 
 @csrf_exempt  
 def update_featured_status(request, project_id):
