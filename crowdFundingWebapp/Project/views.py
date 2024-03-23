@@ -247,8 +247,21 @@ def user_projects(request):
     projects = Project.objects.filter(creator=request.user)
     return render(request, 'projects/user_projects.html', {'projects': projects})
 
+
 def home(request):
-    return render(request, 'Home/home.html')
+    project_images = ProjectImage.objects.all()
+    projects = Project.objects.all().order_by('-created_at')[:5]
+    progress = []
+
+    for project in projects:
+        if project.total_target != 0:
+            percent_complete = (project.current_amount / project.total_target) * 100
+        else:
+            percent_complete = 0  # Avoid division by zero
+
+        progress.append({'project_id': project.id, 'percent_complete': percent_complete})
+
+    return render(request, 'Home/home.html', {'projects': projects, 'project_images': project_images, 'progress': progress})
 
 
 def search(request):

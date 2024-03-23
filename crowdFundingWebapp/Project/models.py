@@ -28,7 +28,8 @@ class Project(models.Model):
     
     is_reported = models.BooleanField(default=False)
     reason_for_report = models.TextField(blank=True, null=True)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.title
 
@@ -39,7 +40,7 @@ class ProjectImage(models.Model):
 
     @property
     def image_url(self):
-        return f'/media/{self.image}'
+        return f'/media/project_images/{self.image}'
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)

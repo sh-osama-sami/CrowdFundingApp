@@ -3,16 +3,66 @@
 {% block title %}Home{% endblock %}
 {% block 'content' %}
 
-
-
 <link rel="stylesheet" href="{% static 'css/home/home.css' %}">
 
-<div>
-    <h1 class="text-center">Your home </h1>
-    <h1 class="text-center" > for help</h1>
+<div class="intro-container">
+    <h1 class="text-center">Your home</h1>
+    <h1 class="text-center">for help</h1>
+    <a class="start-project btn" href="{% url 'create_project' %}">Start a project</a>
 </div>
 
-<a class="start-project btn" href="{% url 'create_project' %}">Start a project</a>
+<div class="latest-container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 >Happening world wide </h2>
+        </div>
+    </div>
+    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
 
-<div id="slider-container" class="slider-container"></div>
+
+  <div class="carousel-inner">
+    {% for project in projects %}
+      {% for image in project_images %}
+
+        {% if project.id == image.project_id %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <a href="{% url 'project_detail' project.id %}">
+              <img class="d-block w-100" src="{{ image.image_url }}" alt="First slide">
+            </a>
+                <div class="carousel-caption d-none d-md-block">
+                  <h5>{{ project.title }}</h5>
+
+                  {% for prog in progress %}
+                    {% if project.id == prog.project_id %}
+                      <div class="progress " style="height: 3px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ prog.percent_complete }}%;" aria-valuenow="{{ prog.percent_complete }}" aria-valuemin="0" aria-valuemax="100">
+
+                        </div>
+
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                     <p class="amount"> $ {{ project.current_amount }} raised </p>
+
+             </div>
+        </div>
+
+            {% endif %}
+
+      {% endfor %}
+    {% endfor %}
+  <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+
+</div>
+</div>
+
+
 {% endblock %}

@@ -19,26 +19,61 @@ body::before {
 }
 
 
-.text-center{
+.intro-container {
+    position: relative; /* Add relative positioning to the container */
     text-align: center;
     color: white;
+}
+
+.text-center {
     font-size: 5rem;
 }
 
 .start-project {
-    margin-top: 5%;
-    margin-left: 42%;/* Add margin between the h1 blocks and the button */
-    padding: 15px 30px; /* Padding */
-    background-color: white; /* Button background color */
-    color: green; /* Text color */
+    position: absolute; /* Add absolute positioning to the button */
+    top: 120%; /* Align to the center vertically */
+    left: 50%; /* Align to the center horizontally */
+    transform: translateX(-50%); /* Center the button horizontally */
+    padding: 15px 30px;
+    background-color: white;
+    color: green;
     border: none;
-    border-radius: 5px; /* Border radius */
-    font-size: 18px; /* Font size */
+    border-radius: 5px;
+    font-size: 18px;
     cursor: pointer;
-    transition: background-color 0.3s ease; /* Smooth transition */
-
+    transition: background-color 0.3s ease;
 }
-
+.latest-container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px; /* Reduce padding */
+    margin-top: 20%; /* Reduce margin */
+    color: green;
+    max-width: 600px;
+    max-height: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
 .start-project:hover {
     background-color: rgba(0, 0, 0, 0.5); /* Darker background color on hover */
   }
+
+ .carousel-caption {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    text-align: center;
+}
+
+.amount{
+    font-size: 15px;
+    margin-top: 10px;
+
+    font-weight: bold;
+}
