@@ -45,6 +45,15 @@
         </div>
 
         <p>Tags: {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+        
+         <!-- Report Button and Form -->
+    <button id="reportButton" class="btn btn-danger">Report Project</button>
+    <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}" style="display: none;">
+        {% csrf_token %}
+        <input type="text" name="reason" placeholder="Enter reason for reporting">
+        <button type="submit">Submit Reason</button>
+    </form>
+
         <!-- Display existing comments -->
         <div>
             <h2>Comments</h2>
@@ -98,6 +107,12 @@
     </div>
 
     <!-- Include Bootstrap JS -->
+    <script>
+        document.getElementById('reportButton').addEventListener('click', function() {
+            document.getElementById('reportForm').style.display = 'block';
+        });
+    </script>
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

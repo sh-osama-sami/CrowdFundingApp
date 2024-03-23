@@ -25,6 +25,9 @@ class Project(models.Model):
     creator = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
+    
+    is_reported = models.BooleanField(default=False)
+    reason_for_report = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.title

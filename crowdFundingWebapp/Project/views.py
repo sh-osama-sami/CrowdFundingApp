@@ -1,11 +1,10 @@
-from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm
+from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Category, Project, ProjectImage, Tag ,Comment
+from .models import Category, Project, ProjectImage, Tag 
 from django.contrib.auth.decorators import login_required
 from authentication.models import CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib import messages
 
 # Create your views here.
 
@@ -82,6 +81,21 @@ def project_details(request, pk):
         comment_form = CommentForm()
 
     return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects, 'comment_form': comment_form})
+
+def report_project(request, pk):
+    project = get_object_or_404(Project, id=pk)
+    if request.method == 'POST':
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            reason = form.cleaned_data['reason']
+            # Process the report (set project as reported, store reason, etc.)
+            project.is_reported = True
+            project.reason_for_report = reason
+            project.save()
+            return redirect('project_details', pk=project.id)  # Redirect to project details page
+    else:
+        form = ReportForm()
+    return render(request, 'Project/project_details.html', {'project': project, 'form': form})
 
 
 #========================================================================================================================
