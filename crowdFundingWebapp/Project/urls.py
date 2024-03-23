@@ -15,5 +15,6 @@ urlpatterns = [
     path('update_featured_status/<int:project_id>/', update_featured_status, name='update_featured_status'),
     path('project/<int:pk>/', project_details, name='project_details'),
     path('report/<int:pk>/', report_project, name='report_project'),
+    path('report_comment/<int:comment_id>/', report_comment, name='report_comment'),
 
 ]

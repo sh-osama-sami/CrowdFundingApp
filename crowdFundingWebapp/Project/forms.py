@@ -92,11 +92,16 @@ class TagForm(forms.ModelForm):
         fields = ['name']
         # widgets = {'image': forms.FileInput(attrs={'multiple': True})}
 
+
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['text']
+  
         
-        
+class ReportCommentForm(forms.Form):
+    reason = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter reason for reporting'}))
+    
+            
 class ReportForm(forms.Form):
     reason = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter reason for reporting'}))
