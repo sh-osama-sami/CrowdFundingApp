@@ -34,7 +34,8 @@ def select_featured_projects(request):
     projects = Project.objects.all()
     categories = Category.objects.all()
     tags = Tag.objects.all()
-    return render(request, 'admin/featured_project.html', {'projects': projects , 'categories': categories ,'tags': tags})
+    images = ProjectImage.objects.all()
+    return render(request, 'admin/featured_project.html', {'projects': projects , 'categories': categories ,'tags': tags, 'images' : images})
 
 @csrf_exempt  
 def update_featured_status(request, project_id):
@@ -48,7 +49,12 @@ def update_featured_status(request, project_id):
             return JsonResponse({'success': False, 'error': 'Project does not exist'}, status=404)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
-
+# @login_required
+# def admin_home(request):
+#     active_projects_count = Project.objects.filter(is_active=1)
+#     non_active_projects_count = Project.objects.filter(is_active=0).count()
+#     print("count: ",active_projects_count)
+#     return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count, 'non_active_projects_count': non_active_projects_count})
 
 # def list_latest_featured_projects(request):
 #     # featured_projects = Project.objects.filter(is_featured=True).order_by('-created_at')[:5]
