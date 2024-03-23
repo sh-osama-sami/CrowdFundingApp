@@ -13,5 +13,7 @@ urlpatterns = [
     path('search/', search, name='search'),
     path('project_list/', project_list, name='project_list'),
     path('project/<int:pk>/', project_details, name='project_details'),
+    path('update_featured_status/<int:project_id>/', update_featured_status, name='update_featured_status'),
+    
 
 ]
