@@ -1,5 +1,5 @@
 from django import forms
-from .models import Category, Project, Tag
+from .models import Category, Project, Tag, Comment
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.utils import timezone
 from .models import Project, ProjectImage, Tag
@@ -91,3 +91,8 @@ class TagForm(forms.ModelForm):
         model = Tag
         fields = ['name']
         # widgets = {'image': forms.FileInput(attrs={'multiple': True})}
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']

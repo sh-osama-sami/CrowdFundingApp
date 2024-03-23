@@ -1,4 +1,4 @@
-from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm
+from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category, Project, ProjectImage, Tag
 from django.contrib.auth.decorators import login_required
@@ -62,9 +62,20 @@ def project_list(request):
 
 
 def project_details(request, pk):
-    project = Project.objects.get(pk=pk)
+    project = get_object_or_404(Project, id=pk)
+    comment_form = CommentForm(request.POST or None)
+
+    if request.method == 'POST' and comment_form.is_valid():
+        user_id = request.POST.get('user_id')  # Get the user ID from the form data
+        user = get_object_or_404(CustomUser, id=user_id)  # Retrieve the CustomUser instance
+        comment = comment_form.save(commit=False)
+        comment.user = user  # Assign the CustomUser instance to the comment
+        comment.project = project
+        comment.save()
+        return redirect('project_details', pk=pk)  # Redirect to the same project details page
+
     similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(pk=pk).distinct()[:4]
-    return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects})
+    return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects, 'comment_form': comment_form})
 
 
 #========================================================================================================================
