@@ -16,22 +16,22 @@ def profile(request):
     return redirect('view_profile', user_id=user_id)
 
 
-def register(request):  # Define a view to render and handle the registration form
-    if request.method == 'POST':  # Check if the request method is POST (form submission)
-        form = RegistrationForm(request.POST, request.FILES)  # Create a form instance with POST data and files
-        if form.is_valid():  # Check if the form data is valid
-            user = form.save(commit=False)  # Save the form data without committing to the database yet
-            user.is_active = False  # Set the user's active status to False initially
-            user.save()  # Save the user object with the updated status
-            verification_email(request, user)  # Send a verification email to the user
+# render and handle registration form
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            verification_email(request, user)
             messages.success(request,
                              'A verification email has been sent to your email address. Please verify your email.')
-            return redirect('register')  # Redirect to the registration page to display a success message
+            return redirect('register')  # Redirect to the same page to display the message
 
     else:
-        form = RegistrationForm()  # Create an empty registration form for GET requests
-    return render(request, 'registration/register.html', {'form': form})  # Render the registration template with the form
-
+        form = RegistrationForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 
 # check if the user has activated his account before login
