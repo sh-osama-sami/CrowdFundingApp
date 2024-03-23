@@ -1,6 +1,8 @@
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
+
+from Project.models import Project
 from .forms import RegistrationForm, UserProfileForm
 from django.http import HttpResponse
 from django.contrib.auth.forms import AuthenticationForm
@@ -88,9 +90,12 @@ def admin_login(request):
 @login_required
 def admin_home(request):
     if request.user.is_authenticated and request.user.is_superuser:
-        return render(request, 'admin/admin_home.html')
+        active_projects_count = Project.objects.filter(is_active=1).count()
+        non_active_projects_count = Project.objects.filter(is_active=0).count()
+        reported_projects = Project.objects.filter(is_reported=True)
+        return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count, 'non_active_projects_count': non_active_projects_count, 'reported_projects': reported_projects})
     else:
-        return redirect('administration') #changed from admin_login beacuse it returns no such url or view
+        return redirect('administration')
 
 
 @login_required
