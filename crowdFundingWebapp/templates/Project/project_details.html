@@ -23,44 +23,51 @@
         {% endfor %}
     </div>
 
-    <!-- Form to add new comment -->
-<form method="post" action="{% url 'project_details' pk=project.id %}">
-    {% csrf_token %}
-    {{ comment_form.as_p }}
-    <input type="hidden" name="user_id" value="{{ request.user.id }}">  <!-- Add this hidden input to pass user ID -->
-    <button type="submit">Submit Comment</button>
-</form>
-    <hr>
-
-    <!-- Image Slider using Bootstrap Carousel -->
-    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            {% for image in project.images.all %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <img src="{{ image.image_url }}" class="d-block w-100 main-project-image" alt="{{ project.title }}">
-            </div>
-            {% endfor %}
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
+    <!-- Add Comment Form (for logged-in users only) -->
+    {% if user.is_authenticated %}
+    <div class="mt-4">
+        <form method="post" action="{% url 'project_details' pk=project.id %}">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <button type="submit" class="btn btn-primary">Add Comment</button>
+        </form>
     </div>
+    {% else %}
+    <p>You must be logged in to add a comment.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+    {% endif %}
 
-    <p>Tags: {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+    <hr>
+<!-- Image Slider using Bootstrap Carousel -->
+<div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        {% for image in project.images.all %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <img src="{{ image.image_url }}" class="d-block w-100 main-project-image" alt="{{ project.title }}">
+        </div>
+        {% endfor %}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
 
+<p>Tags: {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+    
+<!-- Display similar projects -->
     <h2>Similar Projects</h2>
     <div class="row">
         {% for similar_project in similar_projects %}
         <div class="col-md-3">
             <div class="card mb-3">
-                {% with similar_project.images.first as similar_project_image %}
-                <img src="{{ similar_project_image.image_url }}" class="card-img-top" alt="{{ similar_project.title }}">
-                {% endwith %}
+                {% if similar_project.images.exists %}  <!-- Check if images exist for the similar project -->
+                <img src="{{ similar_project.images.first.image.url }}" class="card-img-top" alt="{{ similar_project.title }}">
+                {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ similar_project.title }}</h5>
                     <p class="card-text">{{ similar_project.description }}</p>

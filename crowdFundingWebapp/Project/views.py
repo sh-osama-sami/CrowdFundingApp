@@ -1,12 +1,14 @@
 from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Category, Project, ProjectImage, Tag
+from .models import Category, Project, ProjectImage, Tag ,Comment
 from django.contrib.auth.decorators import login_required
 from authentication.models import CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 # Create your views here.
+
 @login_required
 def create_category(request):
     categories = Category.objects.all()
@@ -63,18 +65,22 @@ def project_list(request):
 
 def project_details(request, pk):
     project = get_object_or_404(Project, id=pk)
-    comment_form = CommentForm(request.POST or None)
-
-    if request.method == 'POST' and comment_form.is_valid():
-        user_id = request.POST.get('user_id')  # Get the user ID from the form data
-        user = get_object_or_404(CustomUser, id=user_id)  # Retrieve the CustomUser instance
-        comment = comment_form.save(commit=False)
-        comment.user = user  # Assign the CustomUser instance to the comment
-        comment.project = project
-        comment.save()
-        return redirect('project_details', pk=pk)  # Redirect to the same project details page
-
     similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(pk=pk).distinct()[:4]
+
+    if request.method == 'POST' and request.user.is_authenticated:
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            # Get the CustomUser instance from the request
+            user = CustomUser.objects.get(pk=request.user.pk)
+            comment = comment_form.save(commit=False)
+            comment.user = user  # Assign the CustomUser instance to the comment
+            comment.project = project
+            comment.save()
+            return redirect('project_details', pk=pk)  # Redirect after successful comment submission
+
+    else:
+        comment_form = CommentForm()
+
     return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects, 'comment_form': comment_form})
 
 
