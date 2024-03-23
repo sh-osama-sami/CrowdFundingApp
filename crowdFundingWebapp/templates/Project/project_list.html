@@ -1,6 +1,7 @@
 {% extends 'layouts/base.html' %}
 {% block title %}Project List{% endblock %}
 {% block 'content' %}
+<div class="container">
     <h1>All Projects</h1>
     <!-- Debugging Output -->
     {% if projects %}
@@ -27,4 +28,5 @@
     {% else %}
         <p>No projects available</p>
     {% endif %}
+</div>
 {% endblock %}
