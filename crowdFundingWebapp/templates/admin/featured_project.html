@@ -68,7 +68,7 @@
     </div>
     <div class="row mt-4" id="projectList">
         {% for project in projects %}
-        <div class="col-md-6 mb-4 project-card" 
+        <div class="col-md-3 mb-2 project-card" 
              data-category="{{ project.category }}"
              data-status="{{ project.status }}"
              data-featured="{% if project.is_featured %}featured{% else %}not-featured{% endif %}"
@@ -76,10 +76,12 @@
             <div class="card">
                 <div id="carousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-inner">
-                        {% for image in project.images.all %}
-                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                            <img src="{{ image.url }}" class="d-block w-100" alt="Project Image">
-                        </div>
+                        {% for image in images %}
+                            {% if image.project_id == project.id %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <img src="{{ image.image_url }}" class="d-block w-100" alt="Project Image" >
+                                </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="prev">
@@ -97,7 +99,7 @@
                     <p class="card-text">Current Amount: {{ project.current_amount }}</p>
                     <p class="card-text">Total Target: {{ project.total_target }}</p>
                     <div class="d-flex align-items-center">
-                        <button class="btn btn-transparent favorite-btn {% if project.is_featured %}text-danger{% endif %}" data-project-id="{{ project.id }}" data-update-url="{% url 'update_featured_status' project.id %}" style="font-size: 50px;">
+                        <button class="btn btn-transparent favorite-btn {% if project.is_featured %}text-danger{% endif %}" data-project-id="{{ project.id }}" data-update-url="{% url 'update_featured_status' project.id %}" style="font-size: 30px;">
                             {% if project.is_featured %}
                             &#9733; 
                             {% else %}
