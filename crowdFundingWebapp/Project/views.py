@@ -46,6 +46,11 @@ def project_list(request):
     return render(request, 'Project/project_list.html', {'projects': projects})
 
 
+def project_details(request, pk):
+    project = Project.objects.get(pk=pk)
+    similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(pk=pk).distinct()[:4]
+    return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects})
+
 
 #========================================================================================================================
 # CRUD operations

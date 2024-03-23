@@ -3,8 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Project Details{% endblock %}</title>
-    <!-- Include Bootstrap CSS and JavaScript -->
+    <!--  Bootstrap CSS and JavaScript -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS for smaller main project image */
+        .main-project-image {
+            max-width: 300px; /* Set the maximum width */
+            height: auto; /* Maintain aspect ratio */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -16,7 +23,7 @@
             <div class="carousel-inner">
                 {% for image in project.images.all %}
                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <img src="{{ image.url }}" class="d-block w-100" alt="{{ project.title }}">
+                    <img src="{{ image.image_url }}" class="d-block w-100 main-project-image" alt="{{ project.title }}">
                 </div>
                 {% endfor %}
             </div>
@@ -31,14 +38,15 @@
         </div>
 
         <p>Tags: {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-        <!-- Add more project details as needed -->
 
         <h2>Similar Projects</h2>
         <div class="row">
             {% for similar_project in similar_projects %}
             <div class="col-md-3">
                 <div class="card mb-3">
-                    <img src="{{ similar_project.image.url }}" class="card-img-top" alt="{{ similar_project.title }}">
+                    {% with similar_project.images.first as similar_project_image %}
+                        <img src="{{ similar_project_image.image_url }}" class="card-img-top" alt="{{ similar_project.title }}">
+                    {% endwith %}
                     <div class="card-body">
                         <h5 class="card-title">{{ similar_project.title }}</h5>
                         <p class="card-text">{{ similar_project.description }}</p>
