@@ -1,10 +1,13 @@
-from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm
+from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Category, Project, ProjectImage, Tag 
+from .models import Category, Project, ProjectImage, Tag , Report, Comment, ReportComment
 from django.contrib.auth.decorators import login_required
 from authentication.models import CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Count
+from django.contrib import messages
+
 
 # Create your views here.
 
@@ -66,6 +69,10 @@ def project_details(request, pk):
     project = get_object_or_404(Project, id=pk)
     similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(pk=pk).distinct()[:4]
     is_reported = project.is_reported  # Check if the project is reported
+    report_count = project.reports.count()
+
+    # Fetch comments related to the project
+    comments = Comment.objects.filter(project=project)  # Assuming Comment is your comment model
 
     if request.method == 'POST' and request.user.is_authenticated:
         comment_form = CommentForm(request.POST)
@@ -76,28 +83,60 @@ def project_details(request, pk):
             comment.project = project
             comment.save()
             return redirect('project_details', pk=pk)
-
     else:
         comment_form = CommentForm()
-
-    return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects, 'comment_form': comment_form, 'is_reported': is_reported})
-
-
-@login_required  # Add this decorator to allow reporting only for logged-in users
+    report_comment_form = ReportCommentForm()
+    return render(request, 'Project/project_details.html', {
+        'project': project,
+        'similar_projects': similar_projects,
+        'comment_form': comment_form,
+        'is_reported': is_reported,
+        'report_count': report_count,
+        'comments': comments,  # Include comments in the context
+        'report_comment_form': report_comment_form
+    })
+    
+    
+@login_required 
 def report_project(request, pk):
-    project = get_object_or_404(Project, id=pk)
+    project = get_object_or_404(Project, pk=pk)
     if request.method == 'POST':
         form = ReportForm(request.POST)
         if form.is_valid():
+            user = CustomUser.objects.get(pk=request.user.pk)  
             reason = form.cleaned_data['reason']
-            project.is_reported = True
-            project.reason_for_report = reason
+            report = Report(project=project, user=user, reason=reason)
+            report.save()
+            project.is_reported = True  
             project.save()
-            return redirect('project_details', pk=project.id)
+            return redirect('project_details', pk=pk)
     else:
         form = ReportForm()
-    return render(request, 'Project/project_details.html', {'project': project, 'form': form})
+    return render(request, 'Project/report_project.html', {'form': form})
 
+@login_required
+def report_comment(request, comment_id):
+    comment = get_object_or_404(Comment, pk=comment_id)
+    user = CustomUser.objects.get(pk=request.user.pk)
+
+    # Check if the user has already reported this comment
+    already_reported = ReportComment.objects.filter(comment=comment, user=user).exists()
+    if already_reported:
+        messages.warning(request, 'You have already reported this comment.')
+    
+    if request.method == 'POST':
+        form = ReportCommentForm(request.POST)
+        if form.is_valid():
+            reason = form.cleaned_data['reason']
+            report_comment = ReportComment(comment=comment, user=user, reason=reason)
+            report_comment.save()
+            messages.success(request, 'Comment successfully reported.')
+            return redirect('project_details', pk=comment.project.pk)
+    else:
+        form = ReportCommentForm()
+
+    context = {'report_comment_form': form, 'already_reported': already_reported}
+    return render(request, 'Project/report_comment.html', context)
 #========================================================================================================================
 # CRUD operations
 #========================================================================================================================

@@ -54,6 +54,29 @@ class Comment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    is_reported = models.BooleanField(default=False)
+    reason_for_report = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f'Comment by {self.user.username} on {self.project.title}'
+    
+
+class Report(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='reports')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    reason = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report on {self.project.title} by {self.user.username}"
+    
+    
+class ReportComment(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    reason = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report on comment {self.comment.id} by {self.user.username}"

@@ -3,7 +3,6 @@
 {% block title %}Project Details{% endblock %}
 
 {% block 'content' %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +16,10 @@
         .main-project-image {
             max-width: 300px; /* Set the maximum width */
             height: auto; /* Maintain aspect ratio */
+        }
+        /* CSS for comment reporting button */
+        .report-comment-btn {
+            float: right;
         }
     </style>
 </head>
@@ -47,75 +50,90 @@
         <p>Tags: {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
         
         {% if user.is_authenticated %}
-        {% if is_reported %}
-            <div class="alert alert-danger" role="alert">
-                This project has been reported. We are reviewing it. Thank you for your feedback.
-            </div>
+            {% if project.is_reported %}
+                <div class="alert alert-danger" role="alert">
+                    This project has been reported. We are reviewing it. Thank you for your feedback.
+                </div>
+            {% else %}
+                <!-- Report Button and Form -->
+                <button id="reportButton" class="btn btn-danger">Report Project</button>
+                <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}" style="display: none;">
+                    {% csrf_token %}
+                    <div id="reasonField" style="display: none;">
+                        <input type="text" name="reason" placeholder="Enter reason for reporting">
+                        <button type="submit">Submit Reason</button>
+                    </div>
+                </form>
+            {% endif %}
         {% else %}
-            <!-- Report Button and Form -->
-            <button id="reportButton" class="btn btn-danger">Report Project</button>
-            <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}" style="display: none;">
-                {% csrf_token %}
-                <input type="text" name="reason" placeholder="Enter reason for reporting">
-                <button type="submit">Submit Reason</button>
-            </form>
+            <div class="alert alert-warning" role="alert">
+                You must be logged in to report this project. Please <a href="{% url 'login' %}">log in</a>
+            </div>
         {% endif %}
-    {% else %}
-        <div class="alert alert-warning" role="alert">
-            You must be logged in to report this project. Please <a href="{% url 'login' %}">log in</a>
-        </div>
-    {% endif %}
 
-
-
-        <!-- Display existing comments -->
-        <div>
-            <h2>Comments</h2>
-            {% for comment in project.comments.all %}
+        <p>Number of Reports: {{ report_count }}</p>
+        
+       <!-- Display existing comments -->
+    <div>
+        <h2>Comments</h2>
+        {% for comment in project.comments.all %}
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-text">{{ comment.text }}</h5>
                     <p class="card-title">{{ comment.user.username }}</p>
                     <p class="card-text"><small class="text-muted">{{ comment.created_at }}</small></p>
+                    <!-- Reporting button for each comment -->
+                    {% if user.is_authenticated %}
+                        {% if not comment.is_reported_by_user %}
+                            <!-- Display the "Report Comment" button and form for comments not reported by the user -->
+                            <form method="post" action="{% url 'report_comment' comment_id=comment.id %}" class="report-comment-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link report-comment-btn">Report Comment</button>
+                            </form>
+                        {% else %}
+                            <!-- Display the message "You have already reported this comment." for comments reported by the user -->
+                            <div class="alert alert-warning" role="alert">
+                                You have already reported this comment.
+                            </div>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
-            {% empty %}
+        {% empty %}
             <p>No comments yet.</p>
-            {% endfor %}
-        </div>
-
+        {% endfor %}
+    </div>
+        
         <!-- Add Comment Form (for logged-in users only) -->
         {% if user.is_authenticated %}
-        <div class="mt-4">
-            <form method="post" action="{% url 'project_details' pk=project.id %}">
-                {% csrf_token %}
-                {{ comment_form.as_p }}
-                <button type="submit" class="btn btn-primary">Add Comment</button>
-            </form>
-        </div>
+            <div class="mt-4">
+                <form method="post" action="{% url 'project_details' pk=project.id %}">
+                    {% csrf_token %}
+                    {{ comment_form.as_p }}
+                    <button type="submit" class="btn btn-primary">Add Comment</button>
+                </form>
+            </div>
         {% else %}
-        <p>You must be logged in to add a comment.</p>
-        <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+            <p>You must be logged in to add or report a comment.</p>
+            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
         {% endif %}
-
-        <hr>
         
         <!-- Display similar projects -->
         <h2>Similar Projects</h2>
         <div class="row">
             {% for similar_project in similar_projects %}
-            <div class="col-md-3">
-                <div class="card mb-3">
-                    {% if similar_project.images.exists %}  <!-- Check if images exist for the similar project -->
-                    <img src="{{ similar_project.images.first.image.url }}" class="card-img-top" alt="{{ similar_project.title }}">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ similar_project.title }}</h5>
-                        <p class="card-text">{{ similar_project.description }}</p>
-                        <a href="{% url 'project_details' pk=similar_project.id %}" class="btn btn-primary">View Details</a>
+                <div class="col-md-3">
+                    <div class="card mb-3">
+                        {% if similar_project.images.exists %}  <!-- Check if images exist for the similar project -->
+                            <img src="{{ similar_project.images.first.image.url }}" class="card-img-top" alt="{{ similar_project.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ similar_project.title }}</h5>
+                            <p class="card-text">{{ similar_project.description }}</p>
+                            <a href="{% url 'project_details' pk=similar_project.id %}" class="btn btn-primary">View Details</a>
+                        </div>
                     </div>
                 </div>
-            </div>
             {% endfor %}
         </div>
     </div>
@@ -124,6 +142,7 @@
     <script>
         document.getElementById('reportButton').addEventListener('click', function() {
             document.getElementById('reportForm').style.display = 'block';
+            document.getElementById('reasonField').style.display = 'block';
         });
     </script>
     

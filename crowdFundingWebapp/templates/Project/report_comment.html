@@ -1,0 +1,29 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %}Report Comment{% endblock %}
+{% block 'content' %}
+<div class="container">
+    <h1>Report Comment</h1>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% if not already_reported %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_reason">Reason for Reporting:</label>
+                {{ report_comment_form.reason }}
+            </div>
+            <button type="submit" class="btn btn-danger">Submit Report</button>
+        </form>
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            You have already reported this comment.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
