@@ -46,13 +46,27 @@
 
         <p>Tags: {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
         
-         <!-- Report Button and Form -->
-    <button id="reportButton" class="btn btn-danger">Report Project</button>
-    <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}" style="display: none;">
-        {% csrf_token %}
-        <input type="text" name="reason" placeholder="Enter reason for reporting">
-        <button type="submit">Submit Reason</button>
-    </form>
+        {% if user.is_authenticated %}
+        {% if is_reported %}
+            <div class="alert alert-danger" role="alert">
+                This project has been reported. We are reviewing it. Thank you for your feedback.
+            </div>
+        {% else %}
+            <!-- Report Button and Form -->
+            <button id="reportButton" class="btn btn-danger">Report Project</button>
+            <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}" style="display: none;">
+                {% csrf_token %}
+                <input type="text" name="reason" placeholder="Enter reason for reporting">
+                <button type="submit">Submit Reason</button>
+            </form>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            You must be logged in to report this project. Please <a href="{% url 'login' %}">log in</a>
+        </div>
+    {% endif %}
+
+
 
         <!-- Display existing comments -->
         <div>

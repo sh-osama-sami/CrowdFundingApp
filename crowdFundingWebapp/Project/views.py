@@ -65,38 +65,38 @@ def project_list(request):
 def project_details(request, pk):
     project = get_object_or_404(Project, id=pk)
     similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(pk=pk).distinct()[:4]
+    is_reported = project.is_reported  # Check if the project is reported
 
     if request.method == 'POST' and request.user.is_authenticated:
         comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
-            # Get the CustomUser instance from the request
             user = CustomUser.objects.get(pk=request.user.pk)
             comment = comment_form.save(commit=False)
-            comment.user = user  # Assign the CustomUser instance to the comment
+            comment.user = user
             comment.project = project
             comment.save()
-            return redirect('project_details', pk=pk)  # Redirect after successful comment submission
+            return redirect('project_details', pk=pk)
 
     else:
         comment_form = CommentForm()
 
-    return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects, 'comment_form': comment_form})
+    return render(request, 'Project/project_details.html', {'project': project, 'similar_projects': similar_projects, 'comment_form': comment_form, 'is_reported': is_reported})
 
+
+@login_required  # Add this decorator to allow reporting only for logged-in users
 def report_project(request, pk):
     project = get_object_or_404(Project, id=pk)
     if request.method == 'POST':
         form = ReportForm(request.POST)
         if form.is_valid():
             reason = form.cleaned_data['reason']
-            # Process the report (set project as reported, store reason, etc.)
             project.is_reported = True
             project.reason_for_report = reason
             project.save()
-            return redirect('project_details', pk=project.id)  # Redirect to project details page
+            return redirect('project_details', pk=project.id)
     else:
         form = ReportForm()
     return render(request, 'Project/project_details.html', {'project': project, 'form': form})
-
 
 #========================================================================================================================
 # CRUD operations
