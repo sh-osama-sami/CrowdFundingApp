@@ -1,4 +1,4 @@
-from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm
+from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm, UpdateProjectImageForm, UpdateTagForm
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category, Project, ProjectImage, Tag , Report, Comment, ReportComment
 from django.contrib.auth.decorators import login_required
@@ -145,11 +145,9 @@ def report_comment(request, comment_id):
 
     context = {'report_comment_form': form, 'already_reported': already_reported}
     return render(request, 'Project/report_comment.html', context)
-#========================================================================================================================
+# ========================================================================================================================
 # CRUD operations
-#========================================================================================================================
-
-
+# ========================================================================================================================
 
 
 @login_required
@@ -157,9 +155,9 @@ def create_project(request):
     if request.method == 'POST':
         project_form = ProjectForm(request.POST)
         image_form = ProjectImageForm(request.POST, request.FILES)
-        tag_form = TagForm(request.POST)  # Instantiate TagForm here
+        tag_form = TagForm(request.POST)
 
-        if project_form.is_valid() and image_form.is_valid() and tag_form.is_valid():
+        if project_form.is_valid() and tag_form.is_valid():
             project = project_form.save(commit=False)
             user_id = request.user.id
             creator = get_object_or_404(CustomUser, id=user_id)
@@ -167,72 +165,91 @@ def create_project(request):
             project.save()
 
             # Save project images
-            for image in request.FILES.getlist('image'):
-                ProjectImage.objects.create(project=project, image=image)
+            if image_form.is_valid():
+                for image in request.FILES.getlist('images'):
+                    ProjectImage.objects.create(project=project, image=image)
 
             # Save project tags
-            tags = tag_form.cleaned_data.get('name', [])
-            for tag_name in tags:
-                tag, _ = Tag.objects.get_or_create(name=tag_name)
-                project.tags.add(tag)
+            if 'name' in tag_form.cleaned_data:
+                tag_names = tag_form.cleaned_data['name']
+                for tag_name in tag_names:
+                    tag, _ = Tag.objects.get_or_create(name=tag_name)
+                    project.tags.add(tag)
 
             return redirect('project_detail', project_id=project.id)
     else:
         project_form = ProjectForm()
         image_form = ProjectImageForm()
-        tag_form = TagForm()  # Instantiate TagForm here
+        tag_form = TagForm()
 
-    return render(request, 'projects/create_project.html', {'project_form': project_form, 'image_form': image_form, 'tag_form': tag_form})
+    return render(request, 'projects/create_project.html', {
+        'project_form': project_form,
+        'image_form': image_form,
+        'tag_form': tag_form,
+    })
 
-
-# @login_required
-# def create_project(request):
-#     if request.method == 'POST':
-#         project_form = ProjectForm(request.POST)
-#         image_form = ProjectImageForm(request.POST, request.FILES)
-#         tag_form = TagForm(request.POST)  # Instantiate TagForm here
-#         if project_form.is_valid():
-#             project = project_form.save(commit=False)
-#             user_id = request.user.id
-#             creator = get_object_or_404(CustomUser, id=user_id)
-#             project.creator = creator
-#             project.save()
-#             # Save project images
-#             for image in request.FILES.getlist('image'):
-#                 ProjectImage.objects.create(project=project, image=image)
-#
-#             # Save project tags
-#             tags = tag_form.cleaned_data['name']
-#             for tag_name in tags:
-#                 tag, _ = Tag.objects.get_or_create(name=tag_name)
-#                 project.tags.add(tag)
-#
-#             return redirect('project_detail', project_id=project.id)
-#     else:
-#         project_form = ProjectForm()
-#         image_form = ProjectImageForm()
-#         tag_form = TagForm()  # Instantiate TagForm here
-#
-#     return render(request, 'create_project.html',
-#                   {'project_form': project_form, 'image_form': image_form, 'tag_form': tag_form})
-#
 
 @login_required
 def project_detail(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     return render(request, 'projects/project_detail.html', {'project': project})
 
+
 @login_required
 def update_project(request, project_id):
-    project = get_object_or_404(Project, id=project_id, creator=request.user)
+    project = get_object_or_404(Project, id=project_id)
+
     if request.method == 'POST':
         project_form = ProjectForm(request.POST, instance=project)
-        if project_form.is_valid():
-            project = project_form.save()
+        image_form = UpdateProjectImageForm(request.POST, request.FILES, prefix='image')
+        tag_form = UpdateTagForm(request.POST, prefix='tag')
+
+        if project_form.is_valid() and tag_form.is_valid():
+            project = project_form.save(commit=False)
+            project.save()
+            # Remove images if selected
+            if 'remove_image' in request.POST:
+                images_to_remove = request.POST.getlist('remove_image')
+                for image_id in images_to_remove:
+                    project.images.filter(id=image_id).delete()
+                    # Remove tags if selected
+            if 'remove_tag' in request.POST:
+                tags_to_remove = request.POST.getlist('remove_tag')
+                for tag_id in tags_to_remove:
+                    project.tags.remove(int(tag_id))
+
+            # Update project images
+            if image_form.is_valid():
+
+                # Add new images if provided
+                if image_form.cleaned_data['images']:
+                    for image in request.FILES.getlist('image-images'):
+                        ProjectImage.objects.create(project=project, image=image)
+
+            # Update project tags
+            if tag_form.is_valid():
+
+                # Add new tags if provided
+                if tag_form.cleaned_data['name']:
+                    tag_names = tag_form.cleaned_data['name']
+                    for tag_name in tag_names:
+                        tag, _ = Tag.objects.get_or_create(name=tag_name.strip())
+                        project.tags.add(tag)
+
             return redirect('project_detail', project_id=project.id)
     else:
         project_form = ProjectForm(instance=project)
-    return render(request, 'projects/update_project.html', {'project_form': project_form})
+        image_form = UpdateProjectImageForm(prefix='image')
+        tag_form = UpdateTagForm(prefix='tag')
+
+    return render(request, 'projects/update_project.html', {
+        'project_form': project_form,
+        'image_form': image_form,
+        'tag_form': tag_form,
+        'project': project,
+    })
+
+
 
 @login_required
 def delete_project(request, project_id):
@@ -242,10 +259,16 @@ def delete_project(request, project_id):
         return redirect('user_projects')
     return render(request, 'projects/delete_project.html', {'project': project})
 
+
 @login_required
 def user_projects(request):
     projects = Project.objects.filter(creator=request.user)
     return render(request, 'projects/user_projects.html', {'projects': projects})
+
+
+# ========================================================================================================================
+# CRUD operations
+# ========================================================================================================================
 
 
 def home(request):
