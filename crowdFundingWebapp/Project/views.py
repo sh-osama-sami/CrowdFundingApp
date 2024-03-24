@@ -37,7 +37,7 @@ def select_featured_projects(request):
     images = ProjectImage.objects.all()
     return render(request, 'admin/featured_project.html', {'projects': projects , 'categories': categories ,'tags': tags, 'images' : images})
 
-@csrf_exempt  
+@csrf_exempt
 def update_featured_status(request, project_id):
     if request.method == 'POST':
         try:
@@ -103,19 +103,19 @@ def project_details(request, pk):
         'comments': comments,  # Include comments in the context
         'report_comment_form': report_comment_form
     })
-    
-    
-@login_required 
+
+
+@login_required
 def report_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
     if request.method == 'POST':
         form = ReportForm(request.POST)
         if form.is_valid():
-            user = CustomUser.objects.get(pk=request.user.pk)  
+            user = CustomUser.objects.get(pk=request.user.pk)
             reason = form.cleaned_data['reason']
             report = Report(project=project, user=user, reason=reason)
             report.save()
-            project.is_reported = True  
+            project.is_reported = True
             project.save()
             return redirect('project_details', pk=pk)
     else:
@@ -131,7 +131,7 @@ def report_comment(request, comment_id):
     already_reported = ReportComment.objects.filter(comment=comment, user=user).exists()
     if already_reported:
         messages.warning(request, 'You have already reported this comment.')
-    
+
     if request.method == 'POST':
         form = ReportCommentForm(request.POST)
         if form.is_valid():
@@ -274,8 +274,10 @@ def user_projects(request):
 def home(request):
     project_images = ProjectImage.objects.all()
     projects = Project.objects.all().order_by('-created_at')[:5]
+    featured_projects = Project.objects.filter(is_featured=True)
+    featured_images = ProjectImage.objects.filter(project__is_featured=True)
     progress = []
-
+    progress_featured = []
     for project in projects:
         if project.total_target != 0:
             percent_complete = (project.current_amount / project.total_target) * 100
@@ -284,7 +286,17 @@ def home(request):
 
         progress.append({'project_id': project.id, 'percent_complete': percent_complete})
 
-    return render(request, 'Home/home.html', {'projects': projects, 'project_images': project_images, 'progress': progress})
+    for featured in featured_projects:
+        if featured.total_target != 0:
+            percent_complete = (featured.current_amount / featured.total_target) * 100
+        else:
+            percent_complete = 0
+        progress_featured.append({'project_id': featured.id, 'percent_complete': percent_complete})
+
+    return render(request, 'Home/home.html', {'projects': projects, 'project_images': project_images, 'progress': progress
+                                              , 'featured_projects': featured_projects
+                                              , 'featured_images': featured_images
+                                              , 'progress_featured': progress_featured})
 
 
 def search(request):
