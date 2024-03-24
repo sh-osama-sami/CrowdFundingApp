@@ -47,6 +47,22 @@
             </button>
         </div>
 
+        {% if project.current_amount != project.total_target %}
+        <div class="col-md-4 text-md">
+            <button type="button" id="donateButton" class="btn btn-success">Donate</button>
+        </div>
+        <div id="donationFormContainer">
+            <div id="donationForm" style="display: none;">
+                <form method="post" action="{% url 'donate' pk=project.id %}">
+                    {% csrf_token %}
+                    <input type="number" name="donation_amount" id="donationAmount" class="form-control" placeholder="Enter Donation Amount" required>
+                    <button type="submit" id="confirmDonation" class="btn btn-primary">Confirm Donation</button>
+                </form>
+            </div>
+            <div id="messageContainer"></div>
+        </div>
+        {% endif %}
+        
         <p>Tags: {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
         
         {% if user.is_authenticated %}
