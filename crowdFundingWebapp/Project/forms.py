@@ -16,6 +16,30 @@ class CategoryForm(forms.ModelForm):
             raise forms.ValidationError("Name must be at least 4 characters long.")
         return name
 
+class DonationForm(forms.Form):
+    donation_amount = forms.DecimalField(label='Donation Amount', min_value=0)
+    
+    def clean_donation_amount(self):
+        donation_amount = self.cleaned_data['donation_amount']
+        if donation_amount <= 0:
+            raise forms.ValidationError("Donation amount must be greater than zero.")
+        return donation_amount
+    
+    def save(self, project):  
+        cleaned_data = self.cleaned_data
+        donation_amount = cleaned_data.get('donation_amount')
+        if project:
+            if project.current_amount is None:
+                project.current_amount = 0
+            if project.current_amount + donation_amount <= project.total_target:
+                project.current_amount += donation_amount
+                project.is_active = 0
+                project.save() 
+                self.success_message = f'Thank you for your donation of ${donation_amount}.'
+            else:
+                raise forms.ValidationError('Sorry, the donation amount exceeds the project total target. Please enter a smaller amount.')
+        else:
+            raise forms.ValidationError('Invalid donation amount. Please enter a valid amount.')
 
 # class ProjectForm(forms.ModelForm):
 #     images = forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
