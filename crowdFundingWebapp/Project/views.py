@@ -1,4 +1,5 @@
-from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm, UpdateProjectImageForm, UpdateTagForm
+from django import forms
+from .forms import CategoryForm, DonationForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm, UpdateProjectImageForm, UpdateTagForm
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category, Project, ProjectImage, Tag , Report, Comment, ReportComment
 from django.contrib.auth.decorators import login_required
@@ -301,3 +302,22 @@ def home(request):
 
 def search(request):
     return render(request, 'Home/search.html')
+
+@login_required
+def donate(request, pk):
+    project = Project.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = DonationForm(request.POST, initial={'project': project})
+        if form.is_valid():
+            try:
+                form.save(project)
+                return JsonResponse({'success': True})
+            except forms.ValidationError as e:
+                errors = {'detail': str(e)}
+                return JsonResponse({'success': False, 'errors': errors})
+        else:
+            errors = form.errors
+            return JsonResponse({'success': False, 'errors': errors})
+    else:
+        form = DonationForm(initial={'project': project})
+    return render(request, 'Project/project_list.html', {'form': form, 'project': project})
