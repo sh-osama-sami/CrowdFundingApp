@@ -1,5 +1,6 @@
 from django.db import models
 from authentication.models import CustomUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Category(models.Model):
@@ -16,8 +17,8 @@ class Project(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     current_amount = models.DecimalField(default=0, max_digits=10, decimal_places=2)
 
-    total_rating = models.IntegerField(default=0)
-    rating_count = models.IntegerField(default=0)
+    total_rating_count = models.IntegerField(default=0)
+    total_rating_value = models.IntegerField(default=0)
 
     total_target = models.DecimalField(max_digits=10, decimal_places=2)
     start_time = models.DateTimeField()
@@ -32,6 +33,27 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.title
+    
+    def update_rating(self):
+        ratings = Rating.objects.filter(project=self)
+        self.total_rating_count = ratings.count()
+        self.total_rating_value = sum(rating.rating for rating in ratings)
+        self.save()
+    
+    def calculate_average_rating(self):
+        if self.total_rating_count > 0:
+            return self.total_rating_value / self.total_rating_count
+        return 0
+    
+    
+class Rating(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = ('user', 'project')  # Ensure each user can rate a project only once
+
 
     def get_absolute_url(self):
         return f'/Projects/{self.id}'
