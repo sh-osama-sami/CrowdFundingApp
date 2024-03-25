@@ -33,7 +33,9 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.title
-    
+
+    def get_absolute_url(self):
+        return f'/Projects/{self.id}'
     def update_rating(self):
         ratings = Rating.objects.filter(project=self)
         self.total_rating_count = ratings.count()
@@ -55,8 +57,7 @@ class Rating(models.Model):
         unique_together = ('user', 'project')  # Ensure each user can rate a project only once
 
 
-    def get_absolute_url(self):
-        return f'/Projects/{self.id}'
+
 
 
 class ProjectImage(models.Model):

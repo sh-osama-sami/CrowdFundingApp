@@ -411,3 +411,10 @@ def search_helper(request):
     html = render(request, 'Home/search_results.html', {'projects': projects}).content.decode('utf-8')
     return JsonResponse({'html': html})
 
+# url home
+# home design
+
+# project multiple images in latest and featured
+# refactor home function and the progress bar
+# picture in project details X
+# project details when image is clicked X
