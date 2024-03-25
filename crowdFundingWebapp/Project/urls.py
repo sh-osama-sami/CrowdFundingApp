@@ -16,5 +16,5 @@ urlpatterns = [
     path('project/<int:pk>/', project_details, name='project_details'),
     path('report/<int:pk>/', report_project, name='report_project'),
     path('report_comment/<int:comment_id>/', report_comment, name='report_comment'),
-
+    path('projects/<int:project_id>/rate/',rate_project, name='rate_project')
 ]

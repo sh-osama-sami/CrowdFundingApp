@@ -2,7 +2,7 @@ from django import forms
 from .models import Category, Project, Tag, Comment
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.utils import timezone
-from .models import Project, ProjectImage, Tag
+from .models import Project, ProjectImage, Tag, Rating
 
 
 class CategoryForm(forms.ModelForm):
@@ -105,3 +105,9 @@ class ReportCommentForm(forms.Form):
             
 class ReportForm(forms.Form):
     reason = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter reason for reporting'}))
+
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['rating']

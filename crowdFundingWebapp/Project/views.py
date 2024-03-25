@@ -1,12 +1,13 @@
-from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm
+from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm, RatingForm
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Category, Project, ProjectImage, Tag , Report, Comment, ReportComment
+from .models import Category, Project, ProjectImage, Tag , Report, Comment, ReportComment, Rating
 from django.contrib.auth.decorators import login_required
 from authentication.models import CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 
 
 # Create your views here.
@@ -79,6 +80,9 @@ def project_details(request, pk):
     is_reported = project.is_reported  # Check if the project is reported
     report_count = project.reports.count()
 
+    ratings = Rating.objects.filter(project=project)
+    average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+
     # Fetch comments related to the project
     comments = Comment.objects.filter(project=project)  # Assuming Comment is your comment model
 
@@ -93,6 +97,8 @@ def project_details(request, pk):
             return redirect('project_details', pk=pk)
     else:
         comment_form = CommentForm()
+
+    rating_form = RatingForm()
     report_comment_form = ReportCommentForm()
     return render(request, 'Project/project_details.html', {
         'project': project,
@@ -101,7 +107,9 @@ def project_details(request, pk):
         'is_reported': is_reported,
         'report_count': report_count,
         'comments': comments,  # Include comments in the context
-        'report_comment_form': report_comment_form
+        'report_comment_form': report_comment_form,
+        'rating_form': rating_form,
+        'average_rating': average_rating
     })
     
     
@@ -266,3 +274,68 @@ def home(request):
 
 def search(request):
     return render(request, 'Home/search.html')
+
+######rating as an integer input###########
+# @login_required
+# def rate_project(request, project_id):
+#     if request.method == 'POST':
+#         # Get the authenticated user
+
+#         # Ensure user is logged in
+#         if not request.user.is_authenticated:
+#             return JsonResponse({'error': 'User must be logged in to rate a project.'}, status=401)
+
+#         # Retrieve the user instance from the database using the user's primary key
+#         try:
+#             user = CustomUser.objects.get(pk=request.user.pk)
+#         except CustomUser.DoesNotExist:
+#             return JsonResponse({'error': 'User does not exist.'}, status=404)
+
+#         # Get the project
+#         project = get_object_or_404(Project, id=project_id)
+
+#         # Get the rating value from the request
+#         rating_value = int(request.POST.get('rating', 0))  # Assuming the rating is submitted via a form with name 'rating'
+
+#         # Check if the rating value is valid (between 1 and 5)
+#         if 1 <= rating_value <= 5:
+#             # Create or update the rating
+#             rating, _ = Rating.objects.update_or_create(user=user, project=project, defaults={'rating': rating_value})
+
+#             # Update the project's total rating count and value
+#             project.update_rating()
+
+#             # Redirect back to the project detail page
+#             return redirect('project_details', pk=project_id)
+#         else:
+#             # If the rating value is invalid, return a JsonResponse with an error message
+#             return JsonResponse({'error': 'Invalid rating value. Rating value must be between 1 and 5.'}, status=400)
+
+#     # Handle GET requests by redirecting to the project detail page
+#     return redirect('project_details', pk=project_id)
+
+
+######rating as stars input###########
+@login_required
+def rate_project(request, project_id):
+    if request.method == 'POST':
+        # Retrieve the rating value from the form
+        rating_value = int(request.POST.get('rating', 0))
+
+        # Validate rating value (optional)
+
+        # Update the rating value in the database for the project
+        project = get_object_or_404(Project, id=project_id)
+        # project.rating = rating_value
+        # project.save()
+        # Create or update the rating
+        user = CustomUser.objects.get(pk=request.user.pk)
+        rating, _ = Rating.objects.update_or_create(user=user, project=project, defaults={'rating': rating_value})
+
+            # Update the project's total rating count and value
+        project.update_rating()
+
+        # Redirect back to the project detail page
+        return redirect('project_details', pk=project_id)
+
+    # Handle GET requests if needed
