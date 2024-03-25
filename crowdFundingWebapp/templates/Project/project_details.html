@@ -164,6 +164,51 @@
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('donateButton').addEventListener('click', function() {
+        var donationForm = document.getElementById('donationForm');
+        donationForm.style.display = 'block';
+    });
+
+document.getElementById('donationForm').addEventListener('submit', function(event) {
+    event.preventDefault(); 
+    var form = event.target;
+    var formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+        document.getElementById('messageContainer').innerHTML = '<div class="alert alert-success">Donation successful!</div>';
+        donationForm.style.display = 'none';
+
+    } else {
+        var errorsHtml = '';
+        for (var key in data.errors) {
+            if (Array.isArray(data.errors[key])) {
+                errorsHtml += '<p>' + data.errors[key].join(', ') + '</p>';
+            } else {
+                errorsHtml += '<p>' + data.errors[key] + '</p>';
+            }
+        }
+        document.getElementById('messageContainer').innerHTML = '<div class="alert alert-danger">' + errorsHtml + '</div>';
+    }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+    document.getElementById('donationAmount').addEventListener('input', function() {
+    document.getElementById('messageContainer').innerHTML = '';
+});
+});
+
+    </script>
 </body>
 </html>
 {% endblock %}
