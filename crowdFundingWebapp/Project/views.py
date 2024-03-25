@@ -411,16 +411,3 @@ def search_helper(request):
     html = render(request, 'Home/search_results.html', {'projects': projects}).content.decode('utf-8')
     return JsonResponse({'html': html})
 
-# first user will type
-# projects matching the live search will appear
-# and filter options will appear
-# filters are with tag and category
-
-# view
-# the projects list will be populated from database and passed to the template
-# the list of projects will be sent to the template and then to the javascript
-
-
-# change design of populated elements
-# add filter options X
-# or search by category or tag X
