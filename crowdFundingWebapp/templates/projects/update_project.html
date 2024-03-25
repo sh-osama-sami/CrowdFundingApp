@@ -5,9 +5,43 @@
   <h2>Update Project</h2>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ project_form.as_p }}
-    {{ image_form.as_p }}
-    {{ tag_form.as_p }}
-    <button type="submit" class="btn btn-primary">Update</button>
+    <div>
+      {{ project_form.as_p }}
+    </div>
+    <div>
+      <h3>Images:</h3>
+      <div>
+        <h4>Current Images:</h4>
+        {% for image in project.images.all %}
+          <div class="current-image">
+            <img src="{{ image.image.url }}" alt="Project Image" width="100" height="100">
+            <input type="checkbox" name="remove_image" value="{{ image.id }}"> Remove
+          </div>
+        {% endfor %}
+      </div>
+      <div>
+        <label>New Images:</label>
+        {{ image_form.images }}
+      </div>
+    </div>
+    <div>
+    <h3>Tags:</h3>
+    <div>
+      <h4>Current Tags:</h4>
+          {% for tag in project.tags.all %}
+            <div class="current-tag">
+            {{ tag.name }}
+            <input type="checkbox" name="remove_tag" value="{{ tag.id }}"> Remove
+          </div>
+        {% endfor %}
+      </div>
+      <div>
+        <label>New Tags:</label>
+        {% for field in tag_form %}
+          {{ field }}
+        {% endfor %}
+      </div>
+    </div>
+    <button type="submit">Submit</button>
   </form>
 {% endblock %}

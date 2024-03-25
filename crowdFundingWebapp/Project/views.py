@@ -1,4 +1,5 @@
-from .forms import CategoryForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm, RatingForm
+from django import forms
+from .forms import CategoryForm, DonationForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm, UpdateProjectImageForm, UpdateTagForm, RatingForm
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category, Project, ProjectImage, Tag , Report, Comment, ReportComment, Rating
 from django.contrib.auth.decorators import login_required
@@ -38,7 +39,7 @@ def select_featured_projects(request):
     images = ProjectImage.objects.all()
     return render(request, 'admin/featured_project.html', {'projects': projects , 'categories': categories ,'tags': tags, 'images' : images})
 
-@csrf_exempt  
+@csrf_exempt
 def update_featured_status(request, project_id):
     if request.method == 'POST':
         try:
@@ -111,19 +112,19 @@ def project_details(request, pk):
         'rating_form': rating_form,
         'average_rating': average_rating
     })
-    
-    
-@login_required 
+
+
+@login_required
 def report_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
     if request.method == 'POST':
         form = ReportForm(request.POST)
         if form.is_valid():
-            user = CustomUser.objects.get(pk=request.user.pk)  
+            user = CustomUser.objects.get(pk=request.user.pk)
             reason = form.cleaned_data['reason']
             report = Report(project=project, user=user, reason=reason)
             report.save()
-            project.is_reported = True  
+            project.is_reported = True
             project.save()
             return redirect('project_details', pk=pk)
     else:
@@ -139,7 +140,7 @@ def report_comment(request, comment_id):
     already_reported = ReportComment.objects.filter(comment=comment, user=user).exists()
     if already_reported:
         messages.warning(request, 'You have already reported this comment.')
-    
+
     if request.method == 'POST':
         form = ReportCommentForm(request.POST)
         if form.is_valid():
@@ -153,11 +154,9 @@ def report_comment(request, comment_id):
 
     context = {'report_comment_form': form, 'already_reported': already_reported}
     return render(request, 'Project/report_comment.html', context)
-#========================================================================================================================
+# ========================================================================================================================
 # CRUD operations
-#========================================================================================================================
-
-
+# ========================================================================================================================
 
 
 @login_required
@@ -165,9 +164,9 @@ def create_project(request):
     if request.method == 'POST':
         project_form = ProjectForm(request.POST)
         image_form = ProjectImageForm(request.POST, request.FILES)
-        tag_form = TagForm(request.POST)  # Instantiate TagForm here
+        tag_form = TagForm(request.POST)
 
-        if project_form.is_valid() and image_form.is_valid() and tag_form.is_valid():
+        if project_form.is_valid() and tag_form.is_valid():
             project = project_form.save(commit=False)
             user_id = request.user.id
             creator = get_object_or_404(CustomUser, id=user_id)
@@ -175,72 +174,91 @@ def create_project(request):
             project.save()
 
             # Save project images
-            for image in request.FILES.getlist('image'):
-                ProjectImage.objects.create(project=project, image=image)
+            if image_form.is_valid():
+                for image in request.FILES.getlist('images'):
+                    ProjectImage.objects.create(project=project, image=image)
 
             # Save project tags
-            tags = tag_form.cleaned_data.get('name', [])
-            for tag_name in tags:
-                tag, _ = Tag.objects.get_or_create(name=tag_name)
-                project.tags.add(tag)
+            if 'name' in tag_form.cleaned_data:
+                tag_names = tag_form.cleaned_data['name']
+                for tag_name in tag_names:
+                    tag, _ = Tag.objects.get_or_create(name=tag_name)
+                    project.tags.add(tag)
 
             return redirect('project_detail', project_id=project.id)
     else:
         project_form = ProjectForm()
         image_form = ProjectImageForm()
-        tag_form = TagForm()  # Instantiate TagForm here
+        tag_form = TagForm()
 
-    return render(request, 'projects/create_project.html', {'project_form': project_form, 'image_form': image_form, 'tag_form': tag_form})
+    return render(request, 'projects/create_project.html', {
+        'project_form': project_form,
+        'image_form': image_form,
+        'tag_form': tag_form,
+    })
 
-
-# @login_required
-# def create_project(request):
-#     if request.method == 'POST':
-#         project_form = ProjectForm(request.POST)
-#         image_form = ProjectImageForm(request.POST, request.FILES)
-#         tag_form = TagForm(request.POST)  # Instantiate TagForm here
-#         if project_form.is_valid():
-#             project = project_form.save(commit=False)
-#             user_id = request.user.id
-#             creator = get_object_or_404(CustomUser, id=user_id)
-#             project.creator = creator
-#             project.save()
-#             # Save project images
-#             for image in request.FILES.getlist('image'):
-#                 ProjectImage.objects.create(project=project, image=image)
-#
-#             # Save project tags
-#             tags = tag_form.cleaned_data['name']
-#             for tag_name in tags:
-#                 tag, _ = Tag.objects.get_or_create(name=tag_name)
-#                 project.tags.add(tag)
-#
-#             return redirect('project_detail', project_id=project.id)
-#     else:
-#         project_form = ProjectForm()
-#         image_form = ProjectImageForm()
-#         tag_form = TagForm()  # Instantiate TagForm here
-#
-#     return render(request, 'create_project.html',
-#                   {'project_form': project_form, 'image_form': image_form, 'tag_form': tag_form})
-#
 
 @login_required
 def project_detail(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     return render(request, 'projects/project_detail.html', {'project': project})
 
+
 @login_required
 def update_project(request, project_id):
-    project = get_object_or_404(Project, id=project_id, creator=request.user)
+    project = get_object_or_404(Project, id=project_id)
+
     if request.method == 'POST':
         project_form = ProjectForm(request.POST, instance=project)
-        if project_form.is_valid():
-            project = project_form.save()
+        image_form = UpdateProjectImageForm(request.POST, request.FILES, prefix='image')
+        tag_form = UpdateTagForm(request.POST, prefix='tag')
+
+        if project_form.is_valid() and tag_form.is_valid():
+            project = project_form.save(commit=False)
+            project.save()
+            # Remove images if selected
+            if 'remove_image' in request.POST:
+                images_to_remove = request.POST.getlist('remove_image')
+                for image_id in images_to_remove:
+                    project.images.filter(id=image_id).delete()
+                    # Remove tags if selected
+            if 'remove_tag' in request.POST:
+                tags_to_remove = request.POST.getlist('remove_tag')
+                for tag_id in tags_to_remove:
+                    project.tags.remove(int(tag_id))
+
+            # Update project images
+            if image_form.is_valid():
+
+                # Add new images if provided
+                if image_form.cleaned_data['images']:
+                    for image in request.FILES.getlist('image-images'):
+                        ProjectImage.objects.create(project=project, image=image)
+
+            # Update project tags
+            if tag_form.is_valid():
+
+                # Add new tags if provided
+                if tag_form.cleaned_data['name']:
+                    tag_names = tag_form.cleaned_data['name']
+                    for tag_name in tag_names:
+                        tag, _ = Tag.objects.get_or_create(name=tag_name.strip())
+                        project.tags.add(tag)
+
             return redirect('project_detail', project_id=project.id)
     else:
         project_form = ProjectForm(instance=project)
-    return render(request, 'projects/update_project.html', {'project_form': project_form})
+        image_form = UpdateProjectImageForm(prefix='image')
+        tag_form = UpdateTagForm(prefix='tag')
+
+    return render(request, 'projects/update_project.html', {
+        'project_form': project_form,
+        'image_form': image_form,
+        'tag_form': tag_form,
+        'project': project,
+    })
+
+
 
 @login_required
 def delete_project(request, project_id):
@@ -250,17 +268,25 @@ def delete_project(request, project_id):
         return redirect('user_projects')
     return render(request, 'projects/delete_project.html', {'project': project})
 
+
 @login_required
 def user_projects(request):
     projects = Project.objects.filter(creator=request.user)
     return render(request, 'projects/user_projects.html', {'projects': projects})
 
 
+# ========================================================================================================================
+# CRUD operations
+# ========================================================================================================================
+
+
 def home(request):
     project_images = ProjectImage.objects.all()
     projects = Project.objects.all().order_by('-created_at')[:5]
+    featured_projects = Project.objects.filter(is_featured=True)
+    featured_images = ProjectImage.objects.filter(project__is_featured=True)
     progress = []
-
+    progress_featured = []
     for project in projects:
         if project.total_target != 0:
             percent_complete = (project.current_amount / project.total_target) * 100
@@ -269,11 +295,41 @@ def home(request):
 
         progress.append({'project_id': project.id, 'percent_complete': percent_complete})
 
-    return render(request, 'Home/home.html', {'projects': projects, 'project_images': project_images, 'progress': progress})
+    for featured in featured_projects:
+        if featured.total_target != 0:
+            percent_complete = (featured.current_amount / featured.total_target) * 100
+        else:
+            percent_complete = 0
+        progress_featured.append({'project_id': featured.id, 'percent_complete': percent_complete})
+
+    return render(request, 'Home/home.html', {'projects': projects, 'project_images': project_images, 'progress': progress
+                                              , 'featured_projects': featured_projects
+                                              , 'featured_images': featured_images
+                                              , 'progress_featured': progress_featured})
 
 
 def search(request):
     return render(request, 'Home/search.html')
+
+
+@login_required
+def donate(request, pk):
+    project = Project.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = DonationForm(request.POST, initial={'project': project})
+        if form.is_valid():
+            try:
+                form.save(project)
+                return JsonResponse({'success': True})
+            except forms.ValidationError as e:
+                errors = {'detail': str(e)}
+                return JsonResponse({'success': False, 'errors': errors})
+        else:
+            errors = form.errors
+            return JsonResponse({'success': False, 'errors': errors})
+    else:
+        form = DonationForm(initial={'project': project})
+    return render(request, 'Project/project_list.html', {'form': form, 'project': project})
 
 ######rating as an integer input###########
 # @login_required

@@ -2,7 +2,8 @@
 {% block title %}Your Projects{% endblock %}
 
 {% block 'content' %}
-  <h2>Your Projects</h2>
+  <h2>Your Projects:</h2>
+  <a href="{% url 'create_project' %}" class="btn btn-primary">Create a Project</a>
   <div class="row">
     {% for project in projects %}
       <div class="col-md-4 mb-4">
@@ -25,6 +26,5 @@
       </div>
     {% endfor %}
   </div>
-<a href="{% url 'create_project' %}" class="btn btn-primary">Create a Project</a>
 {% endblock %}
 

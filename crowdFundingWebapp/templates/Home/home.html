@@ -14,55 +14,87 @@
 <div class="latest-container">
     <div class="row">
         <div class="col-md-12">
-            <h2 >Happening world wide </h2>
+            <h2>Happening Worldwide</h2>
         </div>
     </div>
-    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
-
-
-  <div class="carousel-inner">
-    {% for project in projects %}
-      {% for image in project_images %}
-
-        {% if project.id == image.project_id %}
-        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-            <a href="{% url 'project_detail' project.id %}">
-              <img class="d-block w-100" src="{{ image.image_url }}" alt="First slide">
-            </a>
+    <div id="carouselLatestProjects" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+            {% for project in projects %}
+            {% for image in project_images %}
+            {% if project.id == image.project_id %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <a href="{% url 'project_detail' project.id %}">
+                    <img class="d-block w-100" src="{{ image.image_url }}" alt="Project Image">
+                </a>
                 <div class="carousel-caption d-none d-md-block">
-                  <h5>{{ project.title }}</h5>
-
-                  {% for prog in progress %}
+                    <h5>{{ project.title }}</h5>
+                    {% for prog in progress %}
                     {% if project.id == prog.project_id %}
-                      <div class="progress " style="height: 3px;">
+                    <div class="progress" style="height: 3px;">
                         <div class="progress-bar bg-success" role="progressbar" style="width: {{ prog.percent_complete }}%;" aria-valuenow="{{ prog.percent_complete }}" aria-valuemin="0" aria-valuemax="100">
-
                         </div>
-
-                      </div>
+                    </div>
                     {% endif %}
-                  {% endfor %}
-                     <p class="amount"> $ {{ project.current_amount }} raised </p>
-
-             </div>
-        </div>
-
+                    {% endfor %}
+                    <p class="amount"> $ {{ project.current_amount }} raised </p>
+                </div>
+            </div>
             {% endif %}
-
-      {% endfor %}
-    {% endfor %}
-  <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="sr-only">Previous</span>
-  </a>
-  <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="sr-only">Next</span>
-  </a>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        <a class="carousel-control-prev" href="#carouselLatestProjects" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselLatestProjects" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
 </div>
 
+<div class="latest-container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Featured Now</h2>
+        </div>
+    </div>
+    <div id="carouselFeaturedProjects" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+            {% for project in featured_projects %}
+            {% for image in featured_images %}
+            {% if project.id == image.project_id %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <a href="{% url 'project_detail' project.id %}">
+                    <img class="d-block w-100" src="{{ image.image_url }}" alt="Project Image">
+                </a>
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>{{ project.title }}</h5>
+                    {% for prog in progress_featured %}
+                    {% if project.id == prog.project_id %}
+                    <div class="progress" style="height: 3px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ prog.percent_complete }}%;" aria-valuenow="{{ prog.percent_complete }}" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    <p class="amount"> $ {{ project.current_amount }} raised </p>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endfor %}
+        </div>
+        <a class="carousel-control-prev" href="#carouselFeaturedProjects" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselFeaturedProjects" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
 </div>
-</div>
-
 
 {% endblock %}

@@ -5,9 +5,19 @@
   <h2>Create Project</h2>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ project_form.as_p }}
-    {{ image_form.as_p }}
-    {{ tag_form.as_p }}
-    <button type="submit" class="btn btn-primary">Create</button>
+    <div>
+      {{ project_form.as_p }}
+    </div>
+    <div>
+      <label>Images:</label>
+      {{ image_form.images }}
+<!--      <input type="file" name="images" id="id_images" multiple>-->
+    </div>
+    <div>
+      <label>Tags:</label>
+      {{ tag_form.name }}
+<!--      <input type="text" name="name" id="id_name" multiple>-->
+    </div>
+    <button type="submit">Submit</button>
   </form>
 {% endblock %}
