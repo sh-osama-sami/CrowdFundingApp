@@ -1,5 +1,6 @@
 from django import forms
-from .forms import CategoryForm, DonationForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm, \
+from .forms import CategoryForm, DonationForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, \
+    ReportCommentForm, \
     UpdateProjectImageForm, UpdateTagForm, RatingForm
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category, Project, ProjectImage, Tag, Report, Comment, ReportComment, Rating
@@ -36,21 +37,30 @@ def create_category(request):
 def select_featured_projects(request):
     projects = Project.objects.all()
     categories = Category.objects.all()
-    tags = Tag.objects.all()
-    images = ProjectImage.objects.all()
-    return render(request, 'admin/featured_project.html', {'projects': projects , 'categories': categories ,'tags': tags, 'images' : images})
+    return render(request, 'admin/featured_project.html', {'projects': projects, 'categories': categories})
+
 
 @csrf_exempt
 def update_featured_status(request, project_id):
     if request.method == 'POST':
         try:
             project = Project.objects.get(pk=project_id)
-            project.is_featured = not project.is_featured
-            project.save()
-            return JsonResponse({'success': True})
+            if project.is_featured:
+                project.is_featured = False
+                project.save()
+                return JsonResponse({'success': True, 'message': 'Project unfeatured'})
+            else:
+                featured_projects_count = Project.objects.filter(is_featured=True).count()
+                if featured_projects_count < 5:
+                    project.is_featured = True
+                    project.save()
+                    return JsonResponse({'success': True, 'message': 'Project featured'})
+                else:
+                    return JsonResponse({'success': False, 'error': 'Cannot feature more than 5 projects'}, status=400)
         except Project.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Project does not exist'}, status=404)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
 
 # @login_required
 # def admin_home(request):
@@ -68,7 +78,6 @@ def update_featured_status(request, project_id):
 #     # categories = Category.objects.all()
 #     # return render(request, 'admin/list_categories.html', {'categories': categories})
 #     print(1)
-
 
 
 def project_list(request):
@@ -132,6 +141,7 @@ def report_project(request, pk):
         form = ReportForm()
     return render(request, 'Project/report_project.html', {'form': form})
 
+
 @login_required
 def report_comment(request, comment_id):
     comment = get_object_or_404(Comment, pk=comment_id)
@@ -155,6 +165,8 @@ def report_comment(request, comment_id):
 
     context = {'report_comment_form': form, 'already_reported': already_reported}
     return render(request, 'Project/report_comment.html', context)
+
+
 # ========================================================================================================================
 # CRUD operations
 # ========================================================================================================================
@@ -177,6 +189,7 @@ def create_project(request):
             # Save project images
             if image_form.is_valid():
                 for image in request.FILES.getlist('images'):
+                    image_form.clean_image()
                     ProjectImage.objects.create(project=project, image=image)
 
             # Save project tags
@@ -260,7 +273,6 @@ def update_project(request, project_id):
     })
 
 
-
 @login_required
 def delete_project(request, project_id):
     project = get_object_or_404(Project, id=project_id, creator=request.user)
@@ -315,6 +327,7 @@ def home(request):
 def search(request):
     return render(request, 'Home/search.html')
 
+
 @login_required
 def donate(request, pk):
     project = Project.objects.get(pk=pk)
@@ -333,6 +346,7 @@ def donate(request, pk):
     else:
         form = DonationForm(initial={'project': project})
     return render(request, 'Project/project_list.html', {'form': form, 'project': project})
+
 
 ######rating as an integer input###########
 # @login_required
@@ -391,13 +405,14 @@ def rate_project(request, project_id):
         user = CustomUser.objects.get(pk=request.user.pk)
         rating, _ = Rating.objects.update_or_create(user=user, project=project, defaults={'rating': rating_value})
 
-            # Update the project's total rating count and value
+        # Update the project's total rating count and value
         project.update_rating()
 
         # Redirect back to the project detail page
         return redirect('project_details', pk=project_id)
 
     # Handle GET requests if needed
+
 
 def search_helper(request):
     search_query = request.GET.get('search')

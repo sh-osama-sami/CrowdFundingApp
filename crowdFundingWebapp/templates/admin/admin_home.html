@@ -6,14 +6,17 @@
         <div class="col-md-6">
             <h2 class="text-center mb-4">Reported Projects</h2>
             <ul class="list-group">
-                {% for project in reported_projects %}
+                {% for pro in reported_projects %}
                 <li class="list-group-item">
-                    <strong>{{ project.title }}</strong><br>
-                    Reason: {{ project.reason_for_report }}
+                    <strong>{{ pro.title }}</strong><br>
+
+                    Reason: {{ pro.reports.reason }}
                 </li>
+                <p> hello :{{pro.reports}}</p>
                 {% endfor %}
             </ul>
         </div>
+
         <div class="col-md-6">
             <h2 class="text-center mb-4">Projects Overview</h2>
             <div class="chart-container">

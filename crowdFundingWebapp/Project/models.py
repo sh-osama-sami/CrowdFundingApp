@@ -26,28 +26,30 @@ class Project(models.Model):
     creator = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
-    
+
     is_reported = models.BooleanField(default=False)
     reason_for_report = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         return f'/Projects/{self.id}'
+
     def update_rating(self):
         ratings = Rating.objects.filter(project=self)
         self.total_rating_count = ratings.count()
         self.total_rating_value = sum(rating.rating for rating in ratings)
         self.save()
-    
+
     def calculate_average_rating(self):
         if self.total_rating_count > 0:
             return self.total_rating_value / self.total_rating_count
         return 0
-    
-    
+
+
 class Rating(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -57,16 +59,14 @@ class Rating(models.Model):
         unique_together = ('user', 'project')  # Ensure each user can rate a project only once
 
 
-
-
-
 class ProjectImage(models.Model):
     project = models.ForeignKey(Project, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='project_images/')
 
     @property
     def image_url(self):
-        return f'/media/project_images/{self.image}'
+        return f'/media/{self.image}'
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)
@@ -76,18 +76,35 @@ class Tag(models.Model):
         return self.name
 
 
+# ///////////////////////////////////// COMMENT MODEL//////////////////////////////////////////////////////////////////////////////////
+
+
 class Comment(models.Model):
     project = models.ForeignKey(Project, related_name='comments', on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     is_reported = models.BooleanField(default=False)
     reason_for_report = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f'Comment by {self.user.username} on {self.project.title}'
-    
+
+
+class ReportComment(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    reason = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report on comment {self.comment.id} by {self.user.username}"
+
+
+# ///////////////////////////////////// COMMENT MODEL//////////////////////////////////////////////////////////////////////////////////
+
+# ///////////////////////////////////// REPORT MODEL//////////////////////////////////////////////////////////////////////////////////
 
 class Report(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='reports')
@@ -97,13 +114,5 @@ class Report(models.Model):
 
     def __str__(self):
         return f"Report on {self.project.title} by {self.user.username}"
-    
-    
-class ReportComment(models.Model):
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    reason = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Report on comment {self.comment.id} by {self.user.username}"
+# ///////////////////////////////////// REPORT MODEL//////////////////////////////////////////////////////////////////////////////////

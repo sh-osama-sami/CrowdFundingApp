@@ -100,8 +100,7 @@ class MultipleFileField(forms.FileField):
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        exclude = ['reason_for_report', 'is_reported', 'creator', 'current_amount', 'total_rating', 'rating_count',
-                   'is_active', 'is_featured']
+        fields = ['title', 'details', 'category', 'total_target', 'start_time', 'end_time']
         widgets = {
             'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),

@@ -13,9 +13,7 @@ from .models import CustomUser
 
 @login_required
 def profile(request):
-    user_id = request.user.id
-
-    return redirect('view_profile', user_id=user_id)
+    return redirect('home')
 
 
 # render and handle registration form
@@ -92,7 +90,7 @@ def admin_home(request):
     if request.user.is_authenticated and request.user.is_superuser:
         active_projects_count = Project.objects.filter(is_active=1).count()
         non_active_projects_count = Project.objects.filter(is_active=0).count()
-        reported_projects = Project.objects.filter(is_reported=True)
+        reported_projects = Project.objects.filter(is_reported=1)
         return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count, 'non_active_projects_count': non_active_projects_count, 'reported_projects': reported_projects})
     else:
         return redirect('administration')

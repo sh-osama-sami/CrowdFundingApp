@@ -2,7 +2,7 @@
     {% for project in projects %}
         <div class="project-card">
             <div class="card">
-                <a href="{{ project.get_absolute_url }}">
+                <a href="{% url 'project_details' project.id %}">
                     <img src="{{ project.images.first.image_url }}" class="card-img-top" alt="Project Image">
                 </a>
                 <div class="card-body">
