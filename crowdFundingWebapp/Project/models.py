@@ -33,6 +33,9 @@ class Project(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return f'/Projects/{self.id}'
+
 
 class ProjectImage(models.Model):
     project = models.ForeignKey(Project, related_name='images', on_delete=models.CASCADE)

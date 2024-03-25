@@ -1,7 +1,25 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Home{% endblock %}
+{% load static %}
+{% block title %}Search{% endblock %}
 {% block 'content' %}
+<link rel="stylesheet" href="{% static 'css/home/search.css' %}">
 
+<div class="page-container">
+    <div class="page-title">
+        <h1>Search fundraisers on CrowdFunding</h1>
+        <p>Find fundraisers by  title, category, or a tag</p>
+    </div>
 
+    <div class="search-container" data-search-url="{% url 'search_helper' %}">
+         <input id="search-input" type="text" class="search-bar" name="search" placeholder="Search...">
+    </div>
+
+    <div class="projects-container" id="projects-container">
+
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/home/search.js' %}"></script>
 
 {% endblock %}
+

@@ -1,0 +1,33 @@
+{% if projects %}
+    {% for project in projects %}
+        <div class="project-card">
+            <div class="card">
+                <a href="{{ project.get_absolute_url }}">
+                    <img src="{{ project.images.first.image_url }}" class="card-img-top" alt="Project Image">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title"> <b> {{ project.title }}</b></h5>
+                    <p class="card-text"> by {{ project.creator }}</p>
+                    <div class="progress" style="height: 4px;">
+                        <div id="progress-bar-{{ project.id }}" class="progress-bar bg-success" role="progressbar" aria-valuenow="{{ project.current_amount }}" aria-valuemin="0" aria-valuemax="{{ project.total_target }}">
+                        </div>
+                    </div>
+                    <p class="amount"> $ {{ project.current_amount }} raised </p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Calculate progress percentage
+            var currentAmount = {{ project.current_amount }};
+            var totalTarget = {{ project.total_target }};
+            var progress = (currentAmount / totalTarget) * 100;
+
+            // Set progress bar width dynamically
+            var progressBar = document.getElementById('progress-bar-{{ project.id }}');
+            progressBar.style.width = progress + '%';
+        </script>
+    {% endfor %}
+{% else %}
+    <p>No projects found.</p>
+{% endif %}

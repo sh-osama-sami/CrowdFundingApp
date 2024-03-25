@@ -1,12 +1,13 @@
 from django import forms
-from .forms import CategoryForm, DonationForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm, UpdateProjectImageForm, UpdateTagForm
+from .forms import CategoryForm, DonationForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, ReportCommentForm, \
+    UpdateProjectImageForm, UpdateTagForm
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Category, Project, ProjectImage, Tag , Report, Comment, ReportComment
+from .models import Category, Project, ProjectImage, Tag, Report, Comment, ReportComment
 from django.contrib.auth.decorators import login_required
 from authentication.models import CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib import messages
 
 
@@ -294,10 +295,11 @@ def home(request):
             percent_complete = 0
         progress_featured.append({'project_id': featured.id, 'percent_complete': percent_complete})
 
-    return render(request, 'Home/home.html', {'projects': projects, 'project_images': project_images, 'progress': progress
-                                              , 'featured_projects': featured_projects
-                                              , 'featured_images': featured_images
-                                              , 'progress_featured': progress_featured})
+    return render(request, 'Home/home.html',
+                  {'projects': projects, 'project_images': project_images, 'progress': progress
+                      , 'featured_projects': featured_projects
+                      , 'featured_images': featured_images
+                      , 'progress_featured': progress_featured})
 
 
 def search(request):
@@ -321,3 +323,32 @@ def donate(request, pk):
     else:
         form = DonationForm(initial={'project': project})
     return render(request, 'Project/project_list.html', {'form': form, 'project': project})
+
+def search_helper(request):
+    search_query = request.GET.get('search')
+    projects = Project.objects.all()
+
+    if search_query:
+        projects = projects.filter(
+            Q(title__icontains=search_query) |
+            Q(tags__name__icontains=search_query) |
+            Q(category__name__icontains=search_query)
+        ).distinct()
+
+    # Render the search results template with the filtered projects
+    html = render(request, 'Home/search_results.html', {'projects': projects}).content.decode('utf-8')
+    return JsonResponse({'html': html})
+
+# first user will type
+# projects matching the live search will appear
+# and filter options will appear
+# filters are with tag and category
+
+# view
+# the projects list will be populated from database and passed to the template
+# the list of projects will be sent to the template and then to the javascript
+
+
+# change design of populated elements
+# add filter options X
+# or search by category or tag X

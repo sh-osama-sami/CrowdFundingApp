@@ -11,6 +11,7 @@ urlpatterns = [
     path('user_projects/', user_projects, name='user_projects'),
     path('home/', home, name='home'),
     path('search/', search, name='search'),
+    path('search_helper/', search_helper, name='search_helper'),
     path('project_list/', project_list, name='project_list'),
     path('update_featured_status/<int:project_id>/', update_featured_status, name='update_featured_status'),
     path('project/<int:pk>/', project_details, name='project_details'),
