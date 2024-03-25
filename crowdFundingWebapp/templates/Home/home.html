@@ -20,27 +20,28 @@
     <div id="carouselLatestProjects" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
             {% for project in projects %}
-            {% for image in project_images %}
-            {% if project.id == image.project_id %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <a href="{% url 'project_detail' project.id %}">
-                    <img class="d-block w-100" src="{{ image.image_url }}" alt="Project Image">
-                </a>
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>{{ project.title }}</h5>
-                    {% for prog in progress %}
-                    {% if project.id == prog.project_id %}
-                    <div class="progress" style="height: 3px;">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ prog.percent_complete }}%;" aria-valuenow="{{ prog.percent_complete }}" aria-valuemin="0" aria-valuemax="100">
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <a href="{{ project.get_absolute_url }}">
+                        <img class="d-block w-100" src="{{ project.images.first.image_url }}" alt="Project Image">
+                    </a>
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>{{ project.title }}</h5>
+                        <div class="progress" style="height: 4px;">
+                            <div id="progress-bar-{{ project.id }}" class="progress-bar bg-success" role="progressbar" aria-valuenow="{{ project.current_amount }}" aria-valuemin="0" aria-valuemax="{{ project.total_target }}"></div>
                         </div>
+                        <p class="amount"> $ {{ project.current_amount }} raised </p>
                     </div>
-                    {% endif %}
-                    {% endfor %}
-                    <p class="amount"> $ {{ project.current_amount }} raised </p>
                 </div>
-            </div>
-            {% endif %}
-            {% endfor %}
+                <script>
+                    // Calculate progress percentage
+                    var currentAmount{{ project.id }} = {{ project.current_amount }};
+                    var totalTarget{{ project.id }} = {{ project.total_target }};
+                    var progress{{ project.id }} = (currentAmount{{ project.id }} / totalTarget{{ project.id }}) * 100;
+
+                    // Set progress bar width dynamically
+                    var progressBar{{ project.id }} = document.getElementById('progress-bar-{{ project.id }}');
+                    progressBar{{ project.id }}.style.width = progress{{ project.id }} + '%';
+                </script>
             {% endfor %}
         </div>
         <a class="carousel-control-prev" href="#carouselLatestProjects" role="button" data-slide="prev">
@@ -63,27 +64,28 @@
     <div id="carouselFeaturedProjects" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
             {% for project in featured_projects %}
-            {% for image in featured_images %}
-            {% if project.id == image.project_id %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <a href="{% url 'project_detail' project.id %}">
-                    <img class="d-block w-100" src="{{ image.image_url }}" alt="Project Image">
-                </a>
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>{{ project.title }}</h5>
-                    {% for prog in progress_featured %}
-                    {% if project.id == prog.project_id %}
-                    <div class="progress" style="height: 3px;">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ prog.percent_complete }}%;" aria-valuenow="{{ prog.percent_complete }}" aria-valuemin="0" aria-valuemax="100">
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                   <a href="{{ project.get_absolute_url }}">
+                        <img class="d-block w-100" src="{{ project.images.first.image_url }}" alt="Project Image">
+                    </a>
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>{{ project.title }}</h5>
+                        <div class="progress" style="height: 4px;">
+                            <div id="progress-bar-featured-{{ project.id }}" class="progress-bar bg-success" role="progressbar" aria-valuenow="{{ project.current_amount }}" aria-valuemin="0" aria-valuemax="{{ project.total_target }}"></div>
                         </div>
+                        <p class="amount"> $ {{ project.current_amount }} raised </p>
                     </div>
-                    {% endif %}
-                    {% endfor %}
-                    <p class="amount"> $ {{ project.current_amount }} raised </p>
                 </div>
-            </div>
-            {% endif %}
-            {% endfor %}
+                <script>
+                    // Calculate progress percentage for featured projects
+                    var currentAmountFeatured{{ project.id }} = {{ project.current_amount }};
+                    var totalTargetFeatured{{ project.id }} = {{ project.total_target }};
+                    var progressFeatured{{ project.id }} = (currentAmountFeatured{{ project.id }} / totalTargetFeatured{{ project.id }}) * 100;
+
+                    // Set progress bar width dynamically for featured projects
+                    var progressBarFeatured{{ project.id }} = document.getElementById('progress-bar-featured-{{ project.id }}');
+                    progressBarFeatured{{ project.id }}.style.width = progressFeatured{{ project.id }} + '%';
+                </script>
             {% endfor %}
         </div>
         <a class="carousel-control-prev" href="#carouselFeaturedProjects" role="button" data-slide="prev">
@@ -97,4 +99,5 @@
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 {% endblock %}

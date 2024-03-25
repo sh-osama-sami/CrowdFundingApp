@@ -282,31 +282,34 @@ def user_projects(request):
 
 
 def home(request):
-    project_images = ProjectImage.objects.all()
+    # project_images = ProjectImage.objects.all()
+    # print(project_images)
     projects = Project.objects.all().order_by('-created_at')[:5]
+    # print(projects)
     featured_projects = Project.objects.filter(is_featured=True)
-    featured_images = ProjectImage.objects.filter(project__is_featured=True)
-    progress = []
-    progress_featured = []
-    for project in projects:
-        if project.total_target != 0:
-            percent_complete = (project.current_amount / project.total_target) * 100
-        else:
-            percent_complete = 0  # Avoid division by zero
+    # featured_images = ProjectImage.objects.filter(project__is_featured=True)
+    # progress = []
+    # progress_featured = []
+    # for project in projects:
+    #     if project.total_target != 0:
+    #         percent_complete = (project.current_amount / project.total_target) * 100
+    #     else:
+    #         percent_complete = 0  # Avoid division by zero
+    #
+    #     progress.append({'project_id': project.id, 'percent_complete': percent_complete})
 
-        progress.append({'project_id': project.id, 'percent_complete': percent_complete})
+    # for featured in featured_projects:
+    #     if featured.total_target != 0:
+    #         percent_complete = (featured.current_amount / featured.total_target) * 100
+    #     else:
+    #         percent_complete = 0
+    #     progress_featured.append({'project_id': featured.id, 'percent_complete': percent_complete})
 
-    for featured in featured_projects:
-        if featured.total_target != 0:
-            percent_complete = (featured.current_amount / featured.total_target) * 100
-        else:
-            percent_complete = 0
-        progress_featured.append({'project_id': featured.id, 'percent_complete': percent_complete})
-
-    return render(request, 'Home/home.html', {'projects': projects, 'project_images': project_images, 'progress': progress
-                                              , 'featured_projects': featured_projects
-                                              , 'featured_images': featured_images
-                                              , 'progress_featured': progress_featured})
+    # return render(request, 'Home/home.html', {'projects': projects, 'project_images': project_images, 'progress': progress
+    #                                           , 'featured_projects': featured_projects
+    #                                           , 'featured_images': featured_images
+    #                                           , 'progress_featured': progress_featured})
+    return render(request, 'Home/home.html', {'projects': projects, 'featured_projects': featured_projects})
 
 
 def search(request):
