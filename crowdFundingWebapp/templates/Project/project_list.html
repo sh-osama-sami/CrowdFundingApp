@@ -47,6 +47,8 @@
                                 </button>
                             </div>
                             <p class="card-text"><strong>Owner:</strong> {{ project.creator.username }}</p>
+                            <p class="card-text"><strong>Status:</strong> {{ project.get_status }}</p>
+
                             {% if project.total_target > 0 %}
                                 <div class="progress">
                                     <div class="progress-bar bg-success" role="progressbar" style="width: {{ project.progress_percentage }}%;" aria-valuenow="{{ project.progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
