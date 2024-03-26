@@ -81,7 +81,13 @@ def update_featured_status(request, project_id):
 
 def project_list(request):
     projects = Project.objects.all()
+    for project in projects:
+        if project.total_target > 0:
+            project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
+        else:
+            project.progress_percentage = 0  # To avoid division by zero
     return render(request, 'Project/project_list.html', {'projects': projects})
+
 
 @login_required
 def project_details(request, pk):
