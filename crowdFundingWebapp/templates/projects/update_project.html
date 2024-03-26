@@ -21,7 +21,7 @@
       </div>
       <div>
         <label>New Images:</label>
-        {{ image_form.images }}
+        {{ image_form }}
       </div>
     </div>
     <div>
@@ -36,12 +36,11 @@
         {% endfor %}
       </div>
       <div>
-        <label>New Tags:</label>
-        {% for field in tag_form %}
-          {{ field }}
-        {% endfor %}
+        <label>Add Tags:</label>
+          {{ tag_form }}
       </div>
     </div>
-    <button type="submit">Submit</button>
+    <br>
+    <button type="submit" class="btn btn-primary">Submit</button>
   </form>
 {% endblock %}

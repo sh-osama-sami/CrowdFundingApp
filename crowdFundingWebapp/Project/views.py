@@ -2,6 +2,8 @@ from django import forms
 from .forms import CategoryForm, DonationForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, \
     ReportCommentForm, \
     UpdateProjectImageForm, UpdateTagForm, RatingForm
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category, Project, ProjectImage, Tag, Report, Comment, ReportComment, Rating
 from django.contrib.auth.decorators import login_required
@@ -226,34 +228,40 @@ def report_comment(request, comment_id):
 # ========================================================================================================================
 
 
+
 @login_required
 def create_project(request):
     if request.method == 'POST':
-        project_form = ProjectForm(request.POST)
-        image_form = ProjectImageForm(request.POST, request.FILES)
-        tag_form = TagForm(request.POST)
+        try:
+            project_form = ProjectForm(request.POST)
+            image_form = ProjectImageForm(request.POST, request.FILES)
+            tag_form = TagForm(request.POST)
 
-        if project_form.is_valid() and tag_form.is_valid():
-            project = project_form.save(commit=False)
-            user_id = request.user.id
-            creator = get_object_or_404(CustomUser, id=user_id)
-            project.creator = creator
-            project.save()
+            if project_form.is_valid() and tag_form.is_valid():
+                project = project_form.save(commit=False)
+                user_id = request.user.id
+                creator = get_object_or_404(CustomUser, id=user_id)
+                project.creator = creator
+                project.save()
 
-            # Save project images
-            if image_form.is_valid():
-                for image in request.FILES.getlist('images'):
-                    image_form.clean_image()
-                    ProjectImage.objects.create(project=project, image=image)
+                # Save project images
+                if image_form.is_valid():
+                    for image in request.FILES.getlist('images'):
+                        ProjectImage.objects.create(project=project, image=image)
 
-            # Save project tags
-            if 'name' in tag_form.cleaned_data:
-                tag_names = tag_form.cleaned_data['name']
-                for tag_name in tag_names:
-                    tag, _ = Tag.objects.get_or_create(name=tag_name)
-                    project.tags.add(tag)
+                # Save project tags
+                if 'name' in tag_form.cleaned_data:
+                    tag_names = tag_form.cleaned_data['name']
+                    for tag_name in tag_names:
 
-            return redirect('project_detail', project_id=project.id)
+                        tag, _ = Tag.objects.get_or_create(name=tag_name)
+                        project.tags.add(tag)
+
+                return redirect('project_detail', project_id=project.id)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            # Redirect to an error page or display a message to the user
+            return render(request, 'projects/error.html', context={'error_message': str(e)})
     else:
         project_form = ProjectForm()
         image_form = ProjectImageForm()
@@ -265,55 +273,69 @@ def create_project(request):
         'tag_form': tag_form,
     })
 
-
 @login_required
 def project_detail(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    return render(request, 'projects/project_detail.html', {'project': project})
+    try:
+        project = get_object_or_404(Project, id=project_id)
+    except ObjectDoesNotExist:
+        # Handle the case where the project does not exist
+        return render(request, 'projects/error.html', context={'error_message': 'Project does not exist.'})
+
+    # Calculate progress percentage and format to 2 decimal places
+    if project.total_target > 0:
+        progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
+    else:
+        progress_percentage = 0  # To avoid division by zero
+
+    return render(request, 'projects/project_detail.html', {'project': project, 'progress_percentage': progress_percentage})
 
 
 @login_required
 def update_project(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
+    try:
+        project = get_object_or_404(Project, id=project_id)
+    except ObjectDoesNotExist:
+        return render(request, 'projects/error.html', context={'error_message': 'Project does not exist.'})
 
     if request.method == 'POST':
-        project_form = ProjectForm(request.POST, instance=project)
-        image_form = UpdateProjectImageForm(request.POST, request.FILES, prefix='image')
-        tag_form = UpdateTagForm(request.POST, prefix='tag')
+        try:
+            project_form = ProjectForm(request.POST, instance=project)
+            image_form = UpdateProjectImageForm(request.POST, request.FILES, prefix='image')
+            tag_form = UpdateTagForm(request.POST, prefix='tag')
 
-        if project_form.is_valid() and tag_form.is_valid():
-            project = project_form.save(commit=False)
-            project.save()
-            # Remove images if selected
-            if 'remove_image' in request.POST:
-                images_to_remove = request.POST.getlist('remove_image')
-                for image_id in images_to_remove:
-                    project.images.filter(id=image_id).delete()
-                    # Remove tags if selected
-            if 'remove_tag' in request.POST:
-                tags_to_remove = request.POST.getlist('remove_tag')
-                for tag_id in tags_to_remove:
-                    project.tags.remove(int(tag_id))
+            if project_form.is_valid() and tag_form.is_valid():
+                project = project_form.save(commit=False)
+                project.save()
+                # Remove images if selected
+                if 'remove_image' in request.POST:
+                    images_to_remove = request.POST.getlist('remove_image')
+                    for image_id in images_to_remove:
+                        project.images.filter(id=image_id).delete()
+                # Remove tags if selected
+                if 'remove_tag' in request.POST:
+                    tags_to_remove = request.POST.getlist('remove_tag')
+                    for tag_id in tags_to_remove:
+                        project.tags.remove(int(tag_id))
 
-            # Update project images
-            if image_form.is_valid():
+                # Update project images
+                if image_form.is_valid():
+                    # Add new images if provided
+                    if image_form.cleaned_data['images']:
+                        for image in request.FILES.getlist('image-images'):
+                            ProjectImage.objects.create(project=project, image=image)
 
-                # Add new images if provided
-                if image_form.cleaned_data['images']:
-                    for image in request.FILES.getlist('image-images'):
-                        ProjectImage.objects.create(project=project, image=image)
+                # Update project tags
+                if tag_form.is_valid():
+                    # Add new tags if provided
+                    if tag_form.cleaned_data['name']:
+                        tag_names = tag_form.cleaned_data['name']
+                        for tag_name in tag_names:
+                            tag, _ = Tag.objects.get_or_create(name=tag_name.strip())
+                            project.tags.add(tag)
 
-            # Update project tags
-            if tag_form.is_valid():
-
-                # Add new tags if provided
-                if tag_form.cleaned_data['name']:
-                    tag_names = tag_form.cleaned_data['name']
-                    for tag_name in tag_names:
-                        tag, _ = Tag.objects.get_or_create(name=tag_name.strip())
-                        project.tags.add(tag)
-
-            return redirect('project_detail', project_id=project.id)
+                return redirect('project_detail', project_id=project.id)
+        except Exception as e:
+            return render(request, 'projects/error.html', context={'error_message': str(e)})
     else:
         project_form = ProjectForm(instance=project)
         image_form = UpdateProjectImageForm(prefix='image')
@@ -329,19 +351,33 @@ def update_project(request, project_id):
 
 @login_required
 def delete_project(request, project_id):
-    project = get_object_or_404(Project, id=project_id, creator=request.user)
+    try:
+        project = get_object_or_404(Project, id=project_id, creator=request.user)
+    except ObjectDoesNotExist:
+        # Handle the case where the project does not exist
+        return render(request, 'projects/error.html', context={'error_message': 'Project does not exist.'})
+
+    # Check if the donated amount exceeds 25% of the total target
+    if (project.current_amount / project.total_target) * 100 > 25:
+        return render(request, 'projects/error.html', context={'error_message': 'Donated amount exceeds 25% of total target. Deletion not allowed.'})
+
     if request.method == 'POST':
-        project.delete()
+        try:
+            project.delete()
+        except Exception as e:
+            # Handle the case where an unexpected error occurs
+            return render(request, 'projects/error.html', context={'error_message': str(e)})
         return redirect('user_projects')
     return render(request, 'projects/delete_project.html', {'project': project})
 
-
 @login_required
 def user_projects(request):
-    projects = Project.objects.filter(creator=request.user)
+    try:
+        projects = Project.objects.filter(creator=request.user)
+    except Exception as e:
+        # Handle the case where an unexpected error occurs
+        return render(request, 'projects/error.html', context={'error_message': str(e)})
     return render(request, 'projects/user_projects.html', {'projects': projects})
-
-
 # ========================================================================================================================
 # CRUD operations
 # ========================================================================================================================

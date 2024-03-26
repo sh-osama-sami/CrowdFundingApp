@@ -1,6 +1,8 @@
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
+
 from django.db.models import Count
 from Project.models import Project
 from .forms import RegistrationForm, UserProfileForm
@@ -98,27 +100,47 @@ def admin_home(request):
 
 @login_required
 def view_profile(request, user_id):
-    user = CustomUser.objects.get(pk=user_id)  # Retrieve the logged-in user object
+    try:
+        user = CustomUser.objects.get(pk=user_id)  # Retrieve the logged-in user object
+    except ObjectDoesNotExist:
+        # Handle the case where the user does not exist
+        return render(request, 'profs/error.html', context={'error_message': 'User does not exist.'})
     return render(request, 'profs/view_profile.html', context={'user': user})
-
 
 @login_required
 def edit_profile(request, user_id):
-    user = get_object_or_404(CustomUser, pk=user_id)
+    try:
+        user = get_object_or_404(CustomUser, pk=user_id)
+    except ObjectDoesNotExist:
+        # Handle the case where the user does not exist
+        return render(request, 'profs/error.html', context={'error_message': 'User does not exist.'})
+
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
-            form.save()
+            try:
+                form.save()
+            except Exception as e:
+                # Handle the case where form saving failed
+                return render(request, 'profs/error.html', context={'error_message': str(e)})
             return redirect('view_profile', user_id=user_id)
     else:
         form = UserProfileForm(instance=user)
     return render(request, 'profs/edit_profile.html', context={'form': form})
 
-
 @login_required
 def delete_account(request, user_id):
-    user = get_object_or_404(CustomUser, pk=user_id)
+    try:
+        user = get_object_or_404(CustomUser, pk=user_id)
+    except ObjectDoesNotExist:
+        # Handle the case where the user does not exist
+        return render(request, 'profs/error.html', context={'error_message': 'User does not exist.'})
+
     if request.method == 'POST':
-        user.delete()
+        try:
+            user.delete()
+        except Exception as e:
+            # Handle the case where user deletion failed
+            return render(request, 'profs/error.html', context={'error_message': str(e)})
         return redirect('admin_home')  # Redirect to admin home after user deletion
     return render(request, 'profs/delete_account.html', context={'user_id': user_id})
