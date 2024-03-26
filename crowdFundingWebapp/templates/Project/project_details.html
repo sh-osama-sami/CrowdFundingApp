@@ -69,6 +69,14 @@
 <body>
     <div class="container">
         <h1>{{ project.title }}</h1>
+        <!-- Display average rating -->
+        {% if average_rating %}
+            <div style="display: flex; align-items: center;">
+            <p>Average Rating: {{ average_rating }}</p>
+            <span style="padding: 5px; margin-bottom: 13px; color:gold; font-size: 20px;" class="single_star">★</span>
+            <p>(no. of ratings: {{noOfRating}})</p>
+            </div>
+        {% endif %}
         <p>{{ project.description }}</p>
 
         <!-- Image Slider using Bootstrap Carousel -->
@@ -116,30 +124,6 @@
         {% endif %}
         
         
-        <!-- Display average rating -->
-        {% if average_rating %}
-            <p>Average Rating: {{ average_rating }}</p>
-        {% endif %}
-
-
-        <!-- Display stars for rating -->
-        <div id="rating-section">
-            <div id="rating-stars">
-                <span class="star" data-value="1">★</span>
-                <span class="star" data-value="2">★</span>
-                <span class="star" data-value="3">★</span>
-                <span class="star" data-value="4">★</span>
-                <span class="star" data-value="5">★</span>
-            </div>
-        
-            <!-- Rating form -->
-            <form id="rating-form" method="POST" action="{% url 'rate_project' project_id=project.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="rating" id="rating-value" value="0">
-                <button type="submit" id="rating-button">Rate</button>
-            </form>
-        </div>
-
         <!-- Add Rating Form -->
         <!-- <form method="post" action="{% url 'rate_project' project.id %}">
             {% csrf_token %}
@@ -149,40 +133,58 @@
 
 
         {% if user.is_authenticated %}
-    {% if is_reported %}
-        {% if user_has_reported %}
-            <div class="alert alert-danger" role="alert">
-                This project has been reported. We are reviewing it. Thank you for your feedback.
+            {% if is_reported %}
+                {% if user_has_reported %}
+                    <div class="alert alert-danger" role="alert">
+                        This project has been reported. We are reviewing it. Thank you for your feedback.
+                    </div>
+                {% else %}
+                    <!-- Report Button and Form -->
+                    <button id="reportButton" class="btn btn-danger">Report Project</button>
+                    <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
+                        {% csrf_token %}
+                        <div id="reasonField" style="display: none;">
+                            <input type="text" name="reason" placeholder="Enter reason for reporting">
+                            <button type="submit">Submit Reason</button>
+                        </div>
+                    </form>
+                {% endif %}
+            {% else %}
+                <!-- Report Button and Form -->
+                <button id="reportButton" class="btn btn-danger">Report Project</button>
+                <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
+                    {% csrf_token %}
+                    <div id="reasonField" style="display: none;">
+                        <input type="text" name="reason" placeholder="Enter reason for reporting">
+                        <button type="submit">Submit Reason</button>
+                    </div>
+                </form>
+            {% endif %}
+            <!-- Display stars for rating -->
+            <p style="margin-bottom: 0;">your rating:</p>
+            <div id="rating-section">
+                <div id="rating-stars">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">★</span>
+                    <span class="star" data-value="3">★</span>
+                    <span class="star" data-value="4">★</span>
+                    <span class="star" data-value="5">★</span>
+                </div>
+            
+                <!-- Rating form -->
+                <form id="rating-form" method="POST" action="{% url 'rate_project' project_id=project.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="rating" id="rating-value" value="0">
+                    <button type="submit" id="rating-button">Rate</button>
+                </form>
             </div>
         {% else %}
-            <!-- Report Button and Form -->
-            <button id="reportButton" class="btn btn-danger">Report Project</button>
-            <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
-                {% csrf_token %}
-                <div id="reasonField" style="display: none;">
-                    <input type="text" name="reason" placeholder="Enter reason for reporting">
-                    <button type="submit">Submit Reason</button>
-                </div>
-            </form>
-        {% endif %}
-    {% else %}
-        <!-- Report Button and Form -->
-        <button id="reportButton" class="btn btn-danger">Report Project</button>
-        <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
-            {% csrf_token %}
-            <div id="reasonField" style="display: none;">
-                <input type="text" name="reason" placeholder="Enter reason for reporting">
-                <button type="submit">Submit Reason</button>
+            <div class="alert alert-warning" role="alert">
+                You must be logged in to rate/report this project. Please <a href="{% url 'login' %}">log in</a>
             </div>
-        </form>
-    {% endif %}
-{% else %}
-    <div class="alert alert-warning" role="alert">
-        You must be logged in to report this project. Please <a href="{% url 'login' %}">log in</a>
-    </div>
-{% endif %}
+        {% endif %}
 
-<p>Number of Reports: {{ report_count }}</p>
+        <p>Number of Reports: {{ report_count }}</p>
 
 
 
@@ -280,29 +282,43 @@
         <!-- Include star_rating JavaScript file -->
         <!-- <script src="{% static 'js/star_rating.js' %}"></script> -->
         <script>
-            // JavaScript code to handle star rating
-        document.addEventListener('DOMContentLoaded', function() {
-            const stars = document.querySelectorAll('.star');
-            const ratingValueInput = document.getElementById('rating-value');
-
-            stars.forEach(star => {
-                star.addEventListener('click', function() {
-                    const value = parseInt(this.getAttribute('data-value'));
-                    console.log('Clicked star value:', value);
-                    ratingValueInput.value = value;
-                    highlightStars(value);
-                });
-            });
-
-            function highlightStars(value) {
+            document.addEventListener('DOMContentLoaded', function() {
+                const stars = document.querySelectorAll('.star');
+                const ratingValueInput = document.getElementById('rating-value');
+                let userRating = parseInt("{{ user_rating.rating }}" || 0); // Fetch user's rating from context
+                let currentRating = userRating; // Track the current rating
+        
                 stars.forEach(star => {
-                    const starValue = parseInt(star.getAttribute('data-value'));
-                    console.log('Star value:', starValue);
-                    star.classList.toggle('active', starValue <= value);
+                    star.addEventListener('click', function() {
+                        const value = parseInt(this.getAttribute('data-value'));
+                        console.log('Clicked star value:', value);
+                        currentRating = value; // Update the current rating
+                        ratingValueInput.value = currentRating;
+                        highlightStars(currentRating);
+                    });
                 });
-            }
-        });
-
+        
+                function highlightStars(value) {
+                    stars.forEach(star => {
+                        const starValue = parseInt(star.getAttribute('data-value'));
+                        console.log('Star value:', starValue);
+                        // Check if starValue is less than or equal to currentRating to highlight stars
+                        star.classList.toggle('active', starValue <= currentRating);
+                    });
+                }
+        
+                // Submit rating form when the rate button is clicked
+                document.getElementById('rating-button').addEventListener('click', function() {
+                    // Update the user's rating when the rate button is clicked
+                    userRating = currentRating;
+                    console.log('User rating updated:', userRating);
+                    // Submit the rating form
+                    document.getElementById('rating-form').submit();
+                });
+        
+                // Highlight stars to display the user's previous rating when the page loads
+                highlightStars(userRating);
+            });
         </script>
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
