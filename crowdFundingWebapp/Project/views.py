@@ -70,28 +70,32 @@ def report_details_admin(request,project_id):
     tags = project.tags.all()
     return render(request, 'admin/admin_report_details.html', {'project': project, 'reports': reports , 'tags':tags})
 
-def admin_suspend_project(request,project_id):
+def admin_suspend_project(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     if request.method == 'POST':
         project.is_active = False
         project.save()
-        return redirect(admin_home)
+        return redirect('admin_home')
     return render(request, 'admin/suspend_project_confirmation.html', {'project': project})
 
-def admin_delete_project(request,project_id):
+def admin_delete_project(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     if request.method == 'POST':
         project.delete()
-        return redirect(admin_home)
+        return redirect('admin_home')
     return render(request, 'admin/delete_project_confirmation.html', {'project': project})
 
-def admin_ignore_reports(request,project_id):
+def admin_ignore_reports(request, project_id):
     project = get_object_or_404(Project, id=project_id)
+    report = get_object_or_404(Report, project_id=project_id)
+
     if request.method == 'POST':
-            project.is_reported = False
-            project.reason_for_report = "" 
-            project.save()
-            return redirect(admin_home) 
+        if project.current_amount < project.total_target:
+            project.is_active = True
+        project.is_reported = False
+        report.delete()
+        project.save()
+        return redirect('admin_home')
     return render(request, 'admin/ignore_reports_confirmation.html', {'project': project})
 
 # @login_required

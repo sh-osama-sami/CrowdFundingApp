@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from authentication.views import admin_home
 
 urlpatterns = [
     path('create_category/', create_category, name='create_category'),
@@ -23,5 +24,6 @@ urlpatterns = [
     path('admin_suspend_project/<int:project_id>', admin_suspend_project, name="admin_suspend_project"),
     path('admin_delete_project/<int:project_id>', admin_delete_project, name="admin_delete_project"),
     path('admin_ignore_reports/<int:project_id>', admin_ignore_reports, name="admin_ignore_reports"),
+    path('admin/home/', admin_home, name='admin_home'),
 
 ]

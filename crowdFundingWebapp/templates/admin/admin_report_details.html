@@ -29,20 +29,11 @@
                     </ul>
                 </div>
                 <div class="text-center">
-                    {% if project.get_status != 'Suspended' %}
-                    <form action="{% url 'admin_suspend_project' project.id %}" method="post" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-warning">Suspend Project</button>
-                    </form>
+                    {% if project.get_status == 'Active' %}
+                    <a href="{% url 'admin_suspend_project' project.id %}" class="btn btn-warning">Suspend Project</a>
                     {% endif %}
-                    <form action="{% url 'admin_delete_project' project.id %}" method="post" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Delete Project</button>
-                    </form>
-                    <form action="{% url 'admin_ignore_reports' project.id %}" method="post" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">Ignore Reports</button>
-                    </form>
+                    <a href="{% url 'admin_delete_project' project.id %}" class="btn btn-danger">Delete Project</a>
+                    <a href="{% url 'admin_ignore_reports' project.id %}" class="btn btn-primary">Ignore Project</a>
                 </div>
             </div>
         </div>
