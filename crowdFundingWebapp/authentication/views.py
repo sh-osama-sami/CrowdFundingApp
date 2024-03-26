@@ -1,7 +1,7 @@
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
-
+from django.db.models import Count
 from Project.models import Project
 from .forms import RegistrationForm, UserProfileForm
 from django.http import HttpResponse
@@ -90,7 +90,7 @@ def admin_home(request):
     if request.user.is_authenticated and request.user.is_superuser:
         active_projects_count = Project.objects.filter(is_active=1).count()
         non_active_projects_count = Project.objects.filter(is_active=0).count()
-        reported_projects = Project.objects.filter(is_reported=1)
+        reported_projects = Project.objects.filter(is_reported=True).annotate(report_count=Count('reports'))
         return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count, 'non_active_projects_count': non_active_projects_count, 'reported_projects': reported_projects})
     else:
         return redirect('administration')
