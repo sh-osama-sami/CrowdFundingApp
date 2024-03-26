@@ -79,7 +79,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
         'NAME': 'crowdfundingdb',
-        'USER': 'ember',
+        'USER': 'alaamoh',
         'PASSWORD': 'iti123456789_',  # change based on your mysql password
         'HOST': 'localhost',
         'PORT': '3306',

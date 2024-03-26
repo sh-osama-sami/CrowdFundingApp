@@ -125,28 +125,43 @@
 
 
         {% if user.is_authenticated %}
-            {% if project.is_reported %}
-                <div class="alert alert-danger" role="alert">
-                    This project has been reported. We are reviewing it. Thank you for your feedback.
-                </div>
-            {% else %}
-                <!-- Report Button and Form -->
-                <button id="reportButton" class="btn btn-danger">Report Project</button>
-                <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}" style="display: none;">
-                    {% csrf_token %}
-                    <div id="reasonField" style="display: none;">
-                        <input type="text" name="reason" placeholder="Enter reason for reporting">
-                        <button type="submit">Submit Reason</button>
-                    </div>
-                </form>
-            {% endif %}
-        {% else %}
-            <div class="alert alert-warning" role="alert">
-                You must be logged in to report this project. Please <a href="{% url 'login' %}">log in</a>
+    {% if is_reported %}
+        {% if user_has_reported %}
+            <div class="alert alert-danger" role="alert">
+                This project has been reported. We are reviewing it. Thank you for your feedback.
             </div>
+        {% else %}
+            <!-- Report Button and Form -->
+            <button id="reportButton" class="btn btn-danger">Report Project</button>
+            <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
+                {% csrf_token %}
+                <div id="reasonField" style="display: none;">
+                    <input type="text" name="reason" placeholder="Enter reason for reporting">
+                    <button type="submit">Submit Reason</button>
+                </div>
+            </form>
         {% endif %}
+    {% else %}
+        <!-- Report Button and Form -->
+        <button id="reportButton" class="btn btn-danger">Report Project</button>
+        <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
+            {% csrf_token %}
+            <div id="reasonField" style="display: none;">
+                <input type="text" name="reason" placeholder="Enter reason for reporting">
+                <button type="submit">Submit Reason</button>
+            </div>
+        </form>
+    {% endif %}
+{% else %}
+    <div class="alert alert-warning" role="alert">
+        You must be logged in to report this project. Please <a href="{% url 'login' %}">log in</a>
+    </div>
+{% endif %}
 
-        <p>Number of Reports: {{ report_count }}</p>
+<p>Number of Reports: {{ report_count }}</p>
+
+
+
         
 
        <!-- Display existing comments -->

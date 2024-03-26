@@ -10,7 +10,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count, Avg, Q
 from django.contrib import messages
-from django.contrib.auth import get_user_model
 
 
 # Create your views here.
@@ -84,18 +83,23 @@ def project_list(request):
     projects = Project.objects.all()
     return render(request, 'Project/project_list.html', {'projects': projects})
 
-
+@login_required
 def project_details(request, pk):
     project = get_object_or_404(Project, id=pk)
     similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(pk=pk).distinct()[:4]
     is_reported = project.is_reported  # Check if the project is reported
     report_count = project.reports.count()
-
+    
     ratings = Rating.objects.filter(project=project)
     average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
 
     # Fetch comments related to the project
-    comments = Comment.objects.filter(project=project)  # Assuming Comment is your comment model
+    comments = Comment.objects.filter(project=project)  
+
+    # Check if the current user has reported the project
+    user_has_reported = False
+    if request.user.is_authenticated:
+        user_has_reported = project.reports.filter(user=request.user).exists()
 
     if request.method == 'POST' and request.user.is_authenticated:
         comment_form = CommentForm(request.POST)
@@ -120,26 +124,39 @@ def project_details(request, pk):
         'comments': comments,  # Include comments in the context
         'report_comment_form': report_comment_form,
         'rating_form': rating_form,
-        'average_rating': average_rating
+        'average_rating': average_rating,
+        'user_has_reported': user_has_reported,  # Pass the user_has_reported variable to the template
     })
-
 
 @login_required
 def report_project(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+    project = get_object_or_404(Project, id=pk)
+    user = request.user.customuser  # Fetch the CustomUser instance
+
+    # Check if the user has already reported this project
+    existing_report = Report.objects.filter(user=user, project=project).exists()
+    if existing_report:
+        # Redirect with a message or handle as per your requirements
+        return redirect('project_details', pk=project.id)
+    
     if request.method == 'POST':
         form = ReportForm(request.POST)
         if form.is_valid():
-            user = CustomUser.objects.get(pk=request.user.pk)
             reason = form.cleaned_data['reason']
-            report = Report(project=project, user=user, reason=reason)
+            
+            # Create a new report instance
+            report = Report.objects.create(user=user, project=project, reason=reason)
             report.save()
+            
+            # Set project as reported (if needed)
             project.is_reported = True
             project.save()
-            return redirect('project_details', pk=pk)
+            
+            return redirect('project_details', pk=project.id)  # Redirect to project details page
     else:
         form = ReportForm()
-    return render(request, 'Project/report_project.html', {'form': form})
+    
+    return render(request, 'Project/project_details.html', {'project': project, 'form': form})
 
 
 @login_required
