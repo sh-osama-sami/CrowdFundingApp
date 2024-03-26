@@ -130,6 +130,10 @@ def project_details(request, pk):
     
     ratings = Rating.objects.filter(project=project)
     average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+    # Fetch the user's rating for the project, if exists
+    user_rating = None
+    if request.user.is_authenticated:
+        user_rating = Rating.objects.filter(user=request.user, project=project).first()
 
     # Fetch comments related to the project
     comments = Comment.objects.filter(project=project)  
@@ -163,6 +167,8 @@ def project_details(request, pk):
         'report_comment_form': report_comment_form,
         'rating_form': rating_form,
         'average_rating': average_rating,
+        'noOfRating': project.total_rating_count,
+        'user_rating': user_rating,
         'user_has_reported': user_has_reported,  # Pass the user_has_reported variable to the template
     })
 
@@ -492,9 +498,12 @@ def rate_project(request, project_id):
         # project.save()
         # Create or update the rating
         user = CustomUser.objects.get(pk=request.user.pk)
-        rating, _ = Rating.objects.update_or_create(user=user, project=project, defaults={'rating': rating_value})
+         # Check if the user has previously rated the project
+        rating, created = Rating.objects.get_or_create(user=user, project=project)
+        rating.rating = rating_value
+        rating.save()
 
-        # Update the project's total rating count and value
+            # Update the project's total rating count and value
         project.update_rating()
 
         # Redirect back to the project detail page
