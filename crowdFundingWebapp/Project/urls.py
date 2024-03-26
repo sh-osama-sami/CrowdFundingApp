@@ -18,5 +18,10 @@ urlpatterns = [
     path('report/<int:pk>/', report_project, name='report_project'),
     path('report_comment/<int:comment_id>/', report_comment, name='report_comment'),
     path('donate/<int:pk>/', donate, name='donate'),
-    path('projects/<int:project_id>/rate/',rate_project, name='rate_project')
+    path('projects/<int:project_id>/rate/',rate_project, name='rate_project'),
+    path('report_details_admin/<int:project_id>', report_details_admin, name="report_details_admin"),
+    path('admin_suspend_project/<int:project_id>', admin_suspend_project, name="admin_suspend_project"),
+    path('admin_delete_project/<int:project_id>', admin_delete_project, name="admin_delete_project"),
+    path('admin_ignore_reports/<int:project_id>', admin_ignore_reports, name="admin_ignore_reports"),
+
 ]

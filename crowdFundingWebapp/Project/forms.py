@@ -124,9 +124,8 @@ class ProjectForm(forms.ModelForm):
         return end_time
 
 
-
 class ProjectImageForm(forms.ModelForm):
-    images = MultipleFileField(label='Select files', required=True)
+    images = MultipleFileField(label='Select images', required=True)
 
     class Meta:
         model = ProjectImage
@@ -134,23 +133,19 @@ class ProjectImageForm(forms.ModelForm):
 
     def clean_images(self):
         images = self.cleaned_data.get('images')
+        print(images)
         for image in images:
+            print("image", image)
             if not image.content_type.startswith('image'):
+                print("image 2", image)
                 raise ValidationError("File must be an image.")
         return images
 
 
-    def clean_image(self):
-        images = self.cleaned_data.get('images')
-        if not images:
-            raise forms.ValidationError("Please upload at least one image.")
-        return images
 
+#
 
 class TagForm(forms.ModelForm):
-    name = forms.CharField(label='Tags', widget=forms.TextInput(
-        attrs={'placeholder': 'Enter tags separated by commas', 'maxlength': '200'}))
-
     class Meta:
         model = Tag
         fields = ['name']
@@ -158,8 +153,22 @@ class TagForm(forms.ModelForm):
     def clean_name(self):
         data = self.cleaned_data.get('name')
         tags = [tag.strip() for tag in data.split(',') if tag.strip()]
+
+        if len(tags) != len(set(tags)):
+            raise ValidationError('Duplicate tags are not allowed.')
+
         return tags
 
+    def clean_tag_amount(self):
+        data = self.cleaned_data.get('name')
+        tags = [tag.strip() for tag in data.split(',') if tag.strip()]
+
+        # Check if the number of tags exceeds a certain limit
+        max_tags_limit = 5
+        if len(tags) > max_tags_limit:
+            raise ValidationError(f"Maximum {max_tags_limit} tags allowed.")
+
+        return tags
 
 class UpdateProjectImageForm(forms.ModelForm):
     images = MultipleFileField(label='Select files', required=False)
@@ -174,7 +183,6 @@ class UpdateProjectImageForm(forms.ModelForm):
             if not image.content_type.startswith('image'):
                 raise ValidationError("File must be an image.")
         return images
-
 
     def clean_image(self):
         images = self.cleaned_data.get('images')
@@ -194,9 +202,29 @@ class UpdateTagForm(forms.ModelForm):
     def clean_name(self):
         data = self.cleaned_data.get('name')
         tags = [tag.strip() for tag in data.split(',') if tag.strip()]
+
+        # Check for duplicate tags in the current form
+        if len(tags) != len(set(tags)):
+            raise ValidationError('Duplicate tags are not allowed.')
+
+        # Check for duplicate tags with existing tags in the database
+        existing_tags = Tag.objects.values_list('name', flat=True)
+        duplicate_tags = set(tags).intersection(existing_tags)
+        if duplicate_tags:
+            raise ValidationError(f'The following tags already exist: {", ".join(duplicate_tags)}')
+
         return tags
 
+    def clean_tag_amount(self):
+        data = self.cleaned_data.get('name')
+        tags = [tag.strip() for tag in data.split(',') if tag.strip()]
 
+        # Check if the number of tags exceeds a certain limit
+        max_tags_limit = 5
+        if len(tags) > max_tags_limit:
+            raise ValidationError(f"Maximum {max_tags_limit} tags allowed.")
+
+        return tags
 
 
 # ========================================================================================================================

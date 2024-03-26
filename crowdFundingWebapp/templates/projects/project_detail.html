@@ -31,6 +31,14 @@
 
   <!-- Project Details -->
   <h2>{{ project.title }}</h2>
+<h2>{{ project.get_status }}</h2>
+<div class="progress">
+    <div class="progress-bar" role="progressbar" style="width: {{ progress_percentage }}%;" aria-valuenow="{{ progress_percentage }}" aria-valuemin="0" aria-valuemax="100">{{ progress_percentage }}%</div>
+</div>
+  <p>Donated: {{ project.current_amount }}</p>
+  <p>Target: {{ project.total_target }}</p>
+
+
   <p>Details: {{ project.details }}</p>
   <p>Category: {{ project.category }}</p>
   <p>Total Target: {{ project.total_target }}</p>

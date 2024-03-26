@@ -1,0 +1,51 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Administration - CrowdFunding WebApp{% endblock %}
+{% block 'content' %}
+<div class="container">
+    <h2 class="text-center mb-4">Reported Project Details</h2>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">{{ project.title }}</h4>
+                    <p class="card-subtitle my-1"><strong>Category:</strong> {{ project.category.name }}</p>
+                    <p class="card-subtitle my-1"><strong>Status: </strong>{{ project.get_status }}</p>
+                    <p class="card-subtitle my-1"><strong>Project Owner: </strong>{{ project.creator }}</p>
+                    <p class="card-subtitle my-1"><strong>Amount: </strong> {{ project.current_amount }}</p>
+                    <p class="card-subtitle my-1"><strong>Target: </strong> {{ project.total_target }}</p>
+                    <p class="card-subtitle my-1"><strong>Time: </strong> {{ project.start_time }}</p>
+                    <p class="card-subtitle my-1"><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %} </p>
+                    <p class="card-subtitle my-1"><strong>Number of Reports: </strong>{{ project.reports.count }}</p><br>
+                    
+                    <h6 class="card-subtitle mb-2 text-muted">Reports:</h6>
+                    <ul class="list-group">
+                        {% for report in project.reports.all %}
+                        <li class="list-group-item">
+                            <strong>Username:</strong> {{ report.user.username }}<br>
+                            <strong>Reason:</strong> {{ report.reason }}<br>
+                            <strong>Reported at:</strong> {{ report.created_at }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="text-center">
+                    {% if project.get_status != 'Suspended' %}
+                    <form action="{% url 'admin_suspend_project' project.id %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning">Suspend Project</button>
+                    </form>
+                    {% endif %}
+                    <form action="{% url 'admin_delete_project' project.id %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete Project</button>
+                    </form>
+                    <form action="{% url 'admin_ignore_reports' project.id %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Ignore Reports</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

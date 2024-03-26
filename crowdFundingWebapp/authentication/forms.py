@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import password_validation
 
 
 # registration form that inherits from UserCreationForm
@@ -36,10 +37,15 @@ class RegistrationForm(UserCreationForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    password = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
+    confirm_password = forms.CharField(label='Confirm Password', widget=forms.PasswordInput, required=False)
+
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'mobile_phone', 'profile_picture', 'birthdate', 'facebook_profile',
-                  'country']
+        fields = ['first_name', 'last_name', 'mobile_phone', 'profile_picture', 'birthdate', 'facebook_profile', 'country']
+        widgets = {
+            'birthdate': forms.DateInput(attrs={'type': 'date'}),
+        }
 
     def clean_mobile_phone(self):
         mobile_phone = self.cleaned_data.get('mobile_phone')
@@ -55,3 +61,28 @@ class UserProfileForm(forms.ModelForm):
         if birthdate and birthdate > timezone.now().date():
             raise ValidationError('Please enter a valid birthdate.')
         return birthdate
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        if password or confirm_password:
+            if password != confirm_password:
+                raise ValidationError('Passwords do not match.')
+
+            try:
+                password_validation.validate_password(password)
+            except ValidationError as error:
+                self.add_error('password', error)
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get('password')
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user

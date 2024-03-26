@@ -1,0 +1,17 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Confirm Ignoring Reports{% endblock %}
+{% block 'content' %}
+<div class="container">
+    <h2 class="text-center mb-4">Confirm Ignoring Reports</h2>
+    <div class="row">
+        <div class="col-md-12">
+            <p>Are you sure you want to ignore reports for the project "{{ project.title }}"?</p>
+            <form action="{% url 'admin_ignore_reports' project.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" name="confirm_ignore" value="yes" class="btn btn-danger">Yes, Ignore Reports</button>
+                <a href="{% url 'report_details_admin' project.id %}" class="btn btn-secondary">No, Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
