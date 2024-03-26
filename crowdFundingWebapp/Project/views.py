@@ -10,6 +10,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count, Avg, Q
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+from authentication.views import admin_home
 
 
 # Create your views here.
@@ -60,6 +62,35 @@ def update_featured_status(request, project_id):
             return JsonResponse({'success': False, 'error': 'Project does not exist'}, status=404)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
+def report_details_admin(request,project_id):
+    project = get_object_or_404(Project, id=project_id)
+    reports = project.reports.all()
+    tags = project.tags.all()
+    return render(request, 'admin/admin_report_details.html', {'project': project, 'reports': reports , 'tags':tags})
+
+def admin_suspend_project(request,project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if request.method == 'POST':
+        project.is_active = False
+        project.save()
+        return redirect(admin_home)
+    return render(request, 'admin/suspend_project_confirmation.html', {'project': project})
+
+def admin_delete_project(request,project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if request.method == 'POST':
+        project.delete()
+        return redirect(admin_home)
+    return render(request, 'admin/delete_project_confirmation.html', {'project': project})
+
+def admin_ignore_reports(request,project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if request.method == 'POST':
+            project.is_reported = False
+            project.reason_for_report = "" 
+            project.save()
+            return redirect(admin_home) 
+    return render(request, 'admin/ignore_reports_confirmation.html', {'project': project})
 
 # @login_required
 # def admin_home(request):
