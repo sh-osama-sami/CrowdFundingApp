@@ -122,7 +122,6 @@ def project_list(request):
     return render(request, 'Project/project_list.html', {'projects': projects})
 
 
-@login_required
 def project_details(request, pk):
     project = get_object_or_404(Project, id=pk)
     similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(pk=pk).distinct()[:4]
