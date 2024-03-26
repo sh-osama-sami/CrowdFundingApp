@@ -11,13 +11,26 @@
                     <div class="card mb-3">
                         <div class="card-body">
                             <h5 class="card-title">{{ project.title }}</h5>
-                            <p class="card-text"><strong>Category:</strong> {{ project.category }}</p>
-                            <p class="card-text"><strong>Description:</strong> {{ project.details }}</p>
-                            <p class="card-text"><strong>Creator:</strong> {{ project.creator }}</p>
-                            <p class="card-text"><strong>Current Amount:</strong> ${{ project.current_amount }}</p>
-                            <p class="card-text"><strong>Total Target:</strong> ${{ project.total_target }}</p>
-                            <p class="card-text"><strong>Start Time:</strong> {{ project.start_time }}</p>
-                            <p class="card-text"><strong>End Time:</strong> {{ project.end_time }}</p>
+                            <!-- Image Slider using Bootstrap Carousel -->
+        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for image in project.images.all %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <img src="{{ image.image_url }}" class="d-block w-100 main-project-image" alt="{{ project.title }}">
+                </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        
+                            <p class="card-text"><strong>Owner:</strong> {{ project.creator.username }}</p>
                             <!-- Add more fields as needed -->
                             <a href="{% url 'project_details' project.id %}" class="btn btn-primary">View Details</a>
                         </div>

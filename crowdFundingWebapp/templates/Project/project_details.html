@@ -73,7 +73,16 @@
                 <span class="visually-hidden">Next</span>
             </button>
         </div>
-
+        <p class="card-text"><strong>Category:</strong> {{ project.category }}</p>
+        <p class="card-text"><strong>Description:</strong> {{ project.details }}</p>
+        <p class="card-text"><strong>Creator:</strong> {{ project.creator }}</p>
+        <p class="card-text"><strong>Current Amount:</strong> ${{ project.current_amount }}</p>
+        <p class="card-text"><strong>Total Target:</strong> ${{ project.total_target }}</p>
+        <p class="card-text"><strong>Start Time:</strong> {{ project.start_time }}</p>
+        <p class="card-text"><strong>End Time:</strong> {{ project.end_time }}</p>
+        <p class="card-text"><strong>Owner:</strong> {{ project.creator.username }}</p>
+        <p>Tags: {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+        
         {% if project.current_amount != project.total_target %}
         <div class="col-md-4 text-md">
             <button type="button" id="donateButton" class="btn btn-success">Donate</button>
@@ -90,7 +99,6 @@
         </div>
         {% endif %}
         
-        <p>Tags: {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
         
         <!-- Display average rating -->
         {% if average_rating %}
