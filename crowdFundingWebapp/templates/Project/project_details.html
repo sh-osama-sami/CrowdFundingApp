@@ -242,7 +242,7 @@
     {% for similar_project in similar_projects %}
         <div class="col-md-3">
             <div class="card mb-3">
-                <!-- Image Slider using Bootstrap Carousel for similar projects -->
+                <!-- Image Slider using Bootstrap Carousel for similar projects too -->
                 <div id="carouselSimilar{{ similar_project.id }}" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-inner">
                         {% for image in similar_project.images.all %}
