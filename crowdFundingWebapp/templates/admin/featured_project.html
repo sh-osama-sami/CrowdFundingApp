@@ -123,13 +123,10 @@ document.addEventListener("DOMContentLoaded", function() {
     // const projectList = document.getElementById('projectList');
     document.querySelectorAll('.favorite-btn').forEach(function(button) {
             button.addEventListener('click', function() {
-                this.classList.toggle('text-danger');
-
-                const markAsFeaturedText = this.parentElement.querySelector('span');
-                if (markAsFeaturedText) {
-                    markAsFeaturedText.classList.toggle('d-none');
-                }
                 const url = this.getAttribute('data-update-url');
+                const projectId = this.getAttribute('data-project-id');
+                const markAsFeaturedText = this.parentElement.querySelector('span');
+                
                 fetch(url, {
                     method: 'POST',
                     headers: {
@@ -144,10 +141,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     return response.json();
                 })
                 .then(data => {
-                    console.log(data); 
+                    if(data.success){
+                        button.classList.toggle('text-danger');
+                        if (markAsFeaturedText) {
+                    markAsFeaturedText.classList.toggle('d-none');
+                }
+                    }
                 })
                 .catch(error => {
-                    console.error('There was an error!', error); 
+                    alert('You cannot select more than 5 projects as featured.');
                 });
             });
         });
