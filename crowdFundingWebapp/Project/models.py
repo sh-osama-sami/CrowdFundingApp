@@ -49,6 +49,16 @@ class Project(models.Model):
             return self.total_rating_value / self.total_rating_count
         return 0
 
+    def get_status(self):
+        if self.is_active and self.current_amount < self.total_target:
+            return "Active"
+        elif not self.is_active and self.current_amount < self.total_target:
+            return "Suspended"
+        elif not self.is_active and self.current_amount >= self.total_target:
+            return "Reached Target"
+        else:
+            return "Unknown"
+
 
 class Rating(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
