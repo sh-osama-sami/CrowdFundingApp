@@ -25,5 +25,6 @@ urlpatterns = [
     path('admin_delete_project/<int:project_id>', admin_delete_project, name="admin_delete_project"),
     path('admin_ignore_reports/<int:project_id>', admin_ignore_reports, name="admin_ignore_reports"),
     path('admin/home/', admin_home, name='admin_home'),
+    path('admin_project_details/<int:project_id>', admin_project_details, name="admin_project_details"),
 
 ]

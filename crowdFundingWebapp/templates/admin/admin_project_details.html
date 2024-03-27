@@ -1,0 +1,57 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Administration - CrowdFunding WebApp{% endblock %}
+{% block 'content' %}
+<div class="container">
+    <h2 class="text-center mb-4">Project Details</h2>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="text-center mb-4">{{ project.title }}</h4>
+                    <div id="carousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in project.images.all %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <img src="{{ image.image_url }}" class="d-block w-100" alt="Project Image" >
+                                    </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                    <p class="card-subtitle my-1"><strong>Category:</strong> {{ project.category.name }}</p>
+                    <p class="card-subtitle my-1"><strong>Status: </strong>{{ project.get_status }}</p>
+                    <p class="card-subtitle my-1"><strong>Project Owner: </strong>{{ project.creator }}</p>
+                    <p class="card-subtitle my-1"><strong>Current Amount: </strong> {{ project.current_amount }}</p>
+                    <p class="card-subtitle my-1"><strong>Target: </strong> {{ project.total_target }}</p>
+                    <p class="card-subtitle my-1"><strong>Start Time: </strong> {{ project.start_time }}</p>
+                    <p class="card-subtitle my-1"><strong>End Time: </strong> {{ project.end_time }}</p>
+                    <p class="card-subtitle my-1"><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %} </p>
+                    <p class="card-subtitle my-1"><strong>Number of Reports: </strong>{{ project.reports.count }}</p><br>
+                    <div>
+                        <strong>Comments:</strong>
+                        {% for comment in project.comments.all %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-text">{{ comment.text }}</h5>
+                                    <p class="card-title">{{ comment.user.username }}</p>
+                                    <p class="card-text"><small class="text-muted">{{ comment.created_at }}</small></p>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>No comments yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
