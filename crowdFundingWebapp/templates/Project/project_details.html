@@ -332,10 +332,10 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="replyText{{ comment.id }}" class="form-label">Your Reply:</label>
-                        <textarea class="form-control" id="replyText{{ comment.id }}" name="reply_text" rows="2" placeholder="Write your reply here..." required></textarea>
+                        <textarea class="form-control" id="replyText{{ comment.id }}" name="text" rows="2" placeholder="Write your reply here..." required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary btn-sm">Submit Reply</button>
-                </form>
+                </form>                
             </div>
         </div>
     </div>
