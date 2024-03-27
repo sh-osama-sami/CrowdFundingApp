@@ -116,6 +116,7 @@ def error_page(request):
     return render(request, 'error_page.html', {'error_message': error_message})
 
 
+
 def project_list(request):
     try:
         projects = Project.objects.all()
@@ -126,7 +127,9 @@ def project_list(request):
                 project.progress_percentage = 0  # To avoid division by zero
         return render(request, 'Project/project_list.html', {'projects': projects})
     except ObjectDoesNotExist:
-        return render(request, 'projects/error.html')
+        return render(request, 'Project/error_page.html', {'error_message': 'Error retrieving projects.'})
+
+
 
 def project_details(request, pk):
     try:
@@ -184,6 +187,8 @@ def project_details(request, pk):
         'user_rating': user_rating,
         'user_has_reported': user_has_reported,  # Pass the user_has_reported variable to the template
     })
+    
+    
 
 @login_required
 def report_project(request, pk):
