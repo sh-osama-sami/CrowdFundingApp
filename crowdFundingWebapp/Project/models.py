@@ -36,7 +36,7 @@ class Project(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return f'/Projects/{self.id}'
+        return f'Projects/project/{self.id}'
 
     def update_rating(self):
         ratings = Rating.objects.filter(project=self)

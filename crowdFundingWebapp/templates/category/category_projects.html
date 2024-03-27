@@ -1,0 +1,32 @@
+<!-- category_projects.html -->
+
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+    {{ category.name }} Projects - CrowdFunding WebApp
+{% endblock %}
+
+{% block 'content' %}
+    <div class="container">
+        <h1>{{ category.name }} Projects</h1>
+        <div class="row">
+            {% if projects %}
+                {% for project in projects %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="{{ project.images.first.image_url }}" class="card-img-top" alt="Project Image">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ project.title }}</h5>
+                                <p class="card-text">by {{ project.creator }}</p>
+                                <p class="card-text">$ {{ project.current_amount }} raised</p>
+                                <a href="{% url 'project_details' project.id %}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No projects found in this category.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

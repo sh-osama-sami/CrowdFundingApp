@@ -1,6 +1,8 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
+
 {% block 'content' %}
+
 
 <h1>welcome to login page</h1>
 <form method="post">
@@ -8,9 +10,15 @@
 {{form}}
 <input type="submit" class="btn btn-dark" value="login"> </input>
 </form>
-{% if form.errors %}
-            <div class="alert alert-danger" role="alert">
-                Your account is not activated. Please verify your email.
-            </div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% endif %}
+" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
 {% endif %}
+
 {% endblock %}
+

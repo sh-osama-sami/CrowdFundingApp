@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
@@ -7,6 +9,8 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from .forms import RegistrationForm
 from django.db.models import Count
+from django.utils import timezone
+
 from Project.models import Project
 from .forms import RegistrationForm, UserProfileForm
 from django.http import HttpResponse
@@ -48,19 +52,27 @@ def register(request):
 
 
 
-# check if the user has activated his account before login
 def signin(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, request.POST)
+        form = AuthenticationForm(data=request.POST)
+        print(request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
-            if user is not None and user.is_active:
-                login(request, user)
-                return redirect('home')
+
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect('home')
+                else:
+                    messages.error(request, 'Your account is not activated. Please verify your email.')
             else:
-                messages.error(request, 'Your account is not activated. Please verify your email.')
+                # Authentication failed (invalid username or password)
+                messages.error(request, 'Invalid username or password.')
+        else:
+            # Form is invalid
+            messages.error(request, 'You either have not verified your email or entered invalid credentials.')
     else:
         form = AuthenticationForm()
     return render(request, 'registration/login.html', {'form': form})
@@ -68,7 +80,8 @@ def signin(request):
 
 def verification_email(request, user):
     subject = 'Verify your email address for Crowd Funding'
-    verification_link = request.build_absolute_uri('/authentication/verify/{}/'.format(user.id))
+    verification_token = generate_verification_token(user.id)
+    verification_link = request.build_absolute_uri('/authentication/verify/{}/{}'.format(user.id, verification_token))
     message = 'Thank you for creating an account! Please verify your email address by clicking the link below:\n{}'.format(
         verification_link)
     from_email = 'sherry.osama.sami@gmail.com'
@@ -76,12 +89,35 @@ def verification_email(request, user):
     send_mail(subject, message, from_email, recipient_list)
 
 
-def verify_email(request, user_id):
+def generate_verification_token(user_id):
+    # Generate a token based on user_id and current timestamp
+    timestamp = timezone.now() + timedelta(hours=24)  # Token expires after 24 hours
+    token = '{}_{}'.format(user_id, timestamp.timestamp())
+    return token
+
+
+def verify_email(request, user_id, token):
     user = CustomUser.objects.get(pk=user_id)
-    user.is_active = True
-    user.save()
-    messages.success(request, 'Your email has been verified. Please login.')
+    if check_verification_token(user_id, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, 'Your email has been verified. Please login.')
+    else:
+        messages.error(request, 'expired verification link.')
     return redirect('login')
+
+
+def check_verification_token(user_id, token):
+    try:
+        user_id_from_token, timestamp = token.split('_')
+        user_id_from_token = int(user_id_from_token)
+        timestamp = float(timestamp)
+        # Check if the token is valid (user_id matches and not expired)
+        if user_id == user_id_from_token and timezone.now().timestamp() < timestamp:
+            return True
+    except (ValueError, AttributeError):
+        pass
+    return False
 
 
 def admin_login(request):
@@ -105,7 +141,9 @@ def admin_home(request):
         active_projects_count = Project.objects.filter(is_active=1).count()
         non_active_projects_count = Project.objects.filter(is_active=0).count()
         reported_projects = Project.objects.filter(is_reported=True).annotate(report_count=Count('reports'))
-        return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count, 'non_active_projects_count': non_active_projects_count, 'reported_projects': reported_projects})
+        return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count,
+                                                         'non_active_projects_count': non_active_projects_count,
+                                                         'reported_projects': reported_projects})
     else:
         return redirect('administration')
 
