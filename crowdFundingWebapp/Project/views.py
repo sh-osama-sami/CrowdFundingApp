@@ -43,7 +43,7 @@ def select_featured_projects(request):
         if project.total_target > 0:
             project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
         else:
-            project.progress_percentage = 0 
+            project.progress_percentage = 0
     return render(request, 'admin/featured_project.html', {'projects': projects })
 
 
@@ -108,7 +108,7 @@ def admin_project_details(request,project_id):
     tags = project.tags.all()
     ratings = Rating.objects.filter(project=project)
     average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
-    return render(request, 'admin/admin_project_details.html', 
+    return render(request, 'admin/admin_project_details.html',
                   {'project': project, 'reports': reports , 'tags':tags, 'average_rating': average_rating,'noOfRating': project.total_rating_count,})
 
 
@@ -189,8 +189,8 @@ def project_details(request, pk):
         'user_rating': user_rating,
         'user_has_reported': user_has_reported,  # Pass the user_has_reported variable to the template
     })
-    
-    
+
+
 
 @login_required
 def report_project(request, pk):
@@ -436,34 +436,11 @@ def user_projects(request):
 
 
 def home(request):
-    # project_images = ProjectImage.objects.all()
-    # print(project_images)
-    projects = Project.objects.all().order_by('-created_at')[:5]
-    # print(projects)
-    featured_projects = Project.objects.filter(is_featured=True)
-    # featured_images = ProjectImage.objects.filter(project__is_featured=True)
-    # progress = []
-    # progress_featured = []
-    # for project in projects:
-    #     if project.total_target != 0:
-    #         percent_complete = (project.current_amount / project.total_target) * 100
-    #     else:
-    #         percent_complete = 0  # Avoid division by zero
-    #
-    #     progress.append({'project_id': project.id, 'percent_complete': percent_complete})
-
-    # for featured in featured_projects:
-    #     if featured.total_target != 0:
-    #         percent_complete = (featured.current_amount / featured.total_target) * 100
-    #     else:
-    #         percent_complete = 0
-    #     progress_featured.append({'project_id': featured.id, 'percent_complete': percent_complete})
-
-    # return render(request, 'Home/home.html', {'projects': projects, 'project_images': project_images, 'progress': progress
-    #                                           , 'featured_projects': featured_projects
-    #                                           , 'featured_images': featured_images
-    #                                           , 'progress_featured': progress_featured})
-    return render(request, 'Home/home.html', {'projects': projects, 'featured_projects': featured_projects})
+    projects = Project.objects.all().filter(is_active=True).order_by('-created_at')[:5]
+    featured_projects = Project.objects.filter(is_featured=True , is_active=True)
+    highest_rated_projects = Project.objects.filter(is_active=True).annotate(avg_rating=Avg('rating__rating')).order_by('-avg_rating')[:5]
+    return render(request, 'Home/home.html', {'projects': projects, 'featured_projects': featured_projects
+                                              , 'highest_rated_projects': highest_rated_projects})
 
 
 def search(request):
@@ -572,13 +549,17 @@ def search_helper(request):
         ).distinct()
 
     # Render the search results template with the filtered projects
-    html = render(request, 'Home/search_results.html', {'projects': projects}).content.decode('utf-8')
+    html = render(request, 'Home/search_results.html',
+                  {'projects': projects, 'search_query': search_query}).content.decode('utf-8')
     return JsonResponse({'html': html})
 
-# url home
-# home design
 
-# project multiple images in latest and featured
-# refactor home function and the progress bar
-# picture in project details X
-# project details when image is clicked X
+def all_categories(request):
+    categories = Category.objects.all().values('id', 'name')
+    return JsonResponse(list(categories), safe=False)
+
+
+def category_projects(request, category_id):
+    category = Category.objects.get(pk=category_id)
+    projects = Project.objects.filter(category=category)
+    return render(request, 'category/category_projects.html', {'projects': projects})

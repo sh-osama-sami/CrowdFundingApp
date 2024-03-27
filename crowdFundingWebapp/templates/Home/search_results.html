@@ -1,5 +1,6 @@
 {% if projects %}
     {% for project in projects %}
+        {% if project.is_active %}
         <div class="project-card">
             <div class="card">
                 <a href="{% url 'project_details' project.id %}">
@@ -8,11 +9,26 @@
                 <div class="card-body">
                     <h5 class="card-title"> <b> {{ project.title }}</b></h5>
                     <p class="card-text"> by {{ project.creator }}</p>
+                    {% if search_query not in project.title %}
+                       <p>Tags:
+                            {% for tag in project.tags.all %}
+                                {% if search_query in tag.name %}
+                                    {{ tag.name }}
+                                {% endif %}
+                            {% endfor %}
+                       </p>
+
+                    {% else %}
+                        <p>Category:
+                          {{ project.category.name }}
+                        </p>
+                    {% endif %}
                     <div class="progress" style="height: 4px;">
                         <div id="progress-bar-{{ project.id }}" class="progress-bar bg-success" role="progressbar" aria-valuenow="{{ project.current_amount }}" aria-valuemin="0" aria-valuemax="{{ project.total_target }}">
                         </div>
                     </div>
-                    <p class="amount"> $ {{ project.current_amount }} raised </p>
+                    <p class="amount"> <b>  ${{ project.current_amount }} raised </b></p>
+
                 </div>
             </div>
         </div>
@@ -27,7 +43,8 @@
             var progressBar = document.getElementById('progress-bar-{{ project.id }}');
             progressBar.style.width = progress + '%';
         </script>
+        {% endif %}
     {% endfor %}
 {% else %}
-    <p>No projects found.</p>
+    <p style="color: grey">No projects found.</p>
 {% endif %}
