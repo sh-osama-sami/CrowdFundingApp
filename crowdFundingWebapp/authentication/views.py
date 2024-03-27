@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
@@ -25,7 +26,6 @@ def profile(request):
     return redirect('home')
 
 
-
 def error_page(request):
     error_message = 'An error occurred.'
     return render(request, 'Project/error_page.html', {'error_message': error_message})
@@ -41,7 +41,8 @@ def register(request):
                 user.is_active = False
                 user.save()
                 verification_email(request, user)
-                messages.success(request, 'A verification email has been sent to your email address. Please verify your email.')
+                messages.success(request,
+                                 'A verification email has been sent to your email address. Please verify your email.')
                 return redirect('register')  # Redirect to the same page to display the message
         else:
             form = RegistrationForm()
@@ -51,31 +52,59 @@ def register(request):
     return render(request, 'registration/register.html', {'form': form})
 
 
+#
+# def signin(request):
+#     if request.method == 'POST':
+#         form = AuthenticationForm(data=request.POST)
+#         print(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data.get('username')
+#             password = form.cleaned_data.get('password')
+#             user = authenticate(request, username=username, password=password)
+#
+#             if user is not None:
+#                 if user.is_active:
+#                     login(request, user)
+#                     return redirect('home')
+#                 else:
+#                     messages.error(request, 'Your account is not activated. Please verify your email.')
+#             else:
+#                 # Authentication failed (invalid username or password)
+#                 messages.error(request, 'Invalid username or password.')
+#         else:
+#             # Form is invalid
+#             messages.error(request, 'You either have not verified your email or entered invalid credentials.')
+#     else:
+#         form = AuthenticationForm()
+#     return render(request, 'registration/login.html', {'form': form})
+
 
 def signin(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
-        print(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return redirect('home')
-                else:
-                    messages.error(request, 'Your account is not activated. Please verify your email.')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return redirect('home')
             else:
-                # Authentication failed (invalid username or password)
-                messages.error(request, 'Invalid username or password.')
+                messages.error(request, 'Your account is not activated. Please verify your email.')
         else:
-            # Form is invalid
-            messages.error(request, 'You either have not verified your email or entered invalid credentials.')
+            print(user)
+            messages.info(request, 'Invalid username or password.')
     else:
         form = AuthenticationForm()
     return render(request, 'registration/login.html', {'form': form})
+
+
+def resend_verification_email(request, username):
+    user = User.objects.get(username=username)
+    print(user)
+    verification_email(request, user)
+    messages.success(request, 'A verification email has been sent to your email address. Please verify your email.')
+    return redirect('login')  # Redirect to the same page to display the message
 
 
 def verification_email(request, user):
@@ -157,6 +186,7 @@ def view_profile(request, user_id):
         return render(request, 'profs/error.html', context={'error_message': 'User does not exist.'})
     return render(request, 'profs/view_profile.html', context={'user': user})
 
+
 @login_required
 def edit_profile(request, user_id):
     try:
@@ -177,6 +207,7 @@ def edit_profile(request, user_id):
     else:
         form = UserProfileForm(instance=user)
     return render(request, 'profs/edit_profile.html', context={'form': form})
+
 
 @login_required
 def delete_account(request, user_id):
