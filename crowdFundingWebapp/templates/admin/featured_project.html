@@ -6,6 +6,10 @@
         <div class="col-md-6">
             <div class="input-group">
                 <input type="text" class="form-control form-control-lg" id="searchInput" placeholder="Search Projects">
+                <select id="searchBy">
+                    <option value="name">Project Name</option>
+                    <option value="tag">Tag</option>
+                </select>
             </div>
         </div>
         <!-- <div class="col-md-6">
@@ -94,7 +98,7 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ project.title }}</h5>
                     <p class="card-subtitle my-1"><strong>Status: </strong>{{ project.get_status }}</p>
-                    <p class="card-subtitle my-1"><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %} </p>
+                    <p class="card-tags"><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %} </p>
                     {% if project.total_target > 0 %}
                     <div class="progress">
                         <div class="progress-bar bg-success" role="progressbar" style="width: {{ project.progress_percentage }}%;" aria-valuenow="{{ project.progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
@@ -169,12 +173,17 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     searchInput.addEventListener('input', function() {
             const searchText = searchInput.value.toLowerCase();
+            const searchBy = document.getElementById('searchBy').value;
             const projects = projectList.querySelectorAll('.project-card');
     
             projects.forEach(function(project) {
-                const projectName = project.querySelector('.card-title').textContent.toLowerCase();
-    
-                if (projectName.includes(searchText)) {
+                let searchTarget = '';    
+                if (searchBy === 'name') {
+                    searchTarget = project.querySelector('.card-title').textContent.toLowerCase();
+                } else if (searchBy === 'tag'){
+                    searchTarget = project.querySelector('.card-tags').textContent.toLowerCase();
+                }
+                if (searchTarget.includes(searchText)) {
                     project.style.display = 'block';
                 } else {
                     project.style.display = 'none';
