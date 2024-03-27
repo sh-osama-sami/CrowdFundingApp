@@ -107,21 +107,36 @@
         <p class="card-text"><strong>Owner:</strong> {{ project.creator.username }}</p>
         <p class="card-text"><strong>Status:</strong> {{ project.get_status }}</p>
         <p class="card-text"><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-        
-        {% if project.current_amount != project.total_target %}
-        <div class="col-md-4 text-md">
-            <button type="button" id="donateButton" class="btn btn-success">Donate</button>
-        </div>
-        <div id="donationFormContainer">
-            <div id="donationForm" style="display: none;">
-                <form method="post" action="{% url 'donate' pk=project.id %}">
-                    {% csrf_token %}
-                    <input type="number" name="donation_amount" id="donationAmount" class="form-control" placeholder="Enter Donation Amount" required>
-                    <button type="submit" id="confirmDonation" class="btn btn-primary">Confirm Donation</button>
-                </form>
+        {% if user.is_authenticated %}
+            {% if project.get_status == 'Active' %}
+                <div class="col-md-4 text-md">
+                    <button type="button" id="donateButton" class="btn btn-success">Donate</button>
+                </div>
+                <div id="donationFormContainer">
+                    <div id="donationForm" style="display: none;">
+                        <form method="post" action="{% url 'donate' pk=project.id %}">
+                            {% csrf_token %}
+                            <input type="number" name="donation_amount" id="donationAmount" class="form-control" placeholder="Enter Donation Amount" required>
+                            <button type="submit" id="confirmDonation" class="btn btn-primary">Confirm Donation</button>
+                        </form>
+                    </div>
+                    <div id="messageContainer"></div>
+                </div>
+            {% endif %}
+            {% if project.get_status == 'Suspended' %}
+            <div class="alert alert-warning" role="alert">
+                This project is Suspended Now! You can't Donate to it .
             </div>
-            <div id="messageContainer"></div>
-        </div>
+            {% endif %}
+            {% if project.get_status == 'Reached Target' %}
+            <div class="alert alert-success" role="alert">
+                This project already reached Target! You can't Donate to it .
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                You must be logged in to Donate to this project. Please <a href="{% url 'login' %}">log in</a>
+            </div>
         {% endif %}
         
         
@@ -324,13 +339,14 @@
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         document.getElementById('donateButton').addEventListener('click', function() {
         var donationForm = document.getElementById('donationForm');
         donationForm.style.display = 'block';
     });
 
-document.getElementById('donationForm').addEventListener('submit', function(event) {
+    document.getElementById('donationForm').addEventListener('submit', function(event) {
     event.preventDefault(); 
     var form = event.target;
     var formData = new FormData(form);
@@ -345,30 +361,34 @@ document.getElementById('donationForm').addEventListener('submit', function(even
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-        document.getElementById('messageContainer').innerHTML = '<div class="alert alert-success">Donation successful!</div>';
-        donationForm.style.display = 'none';
-
-    } else {
-        var errorsHtml = '';
-        for (var key in data.errors) {
-            if (Array.isArray(data.errors[key])) {
-                errorsHtml += '<p>' + data.errors[key].join(', ') + '</p>';
-            } else {
-                errorsHtml += '<p>' + data.errors[key] + '</p>';
+            var successMessage = data.message;
+            document.getElementById('messageContainer').innerHTML = '<div class="alert alert-success">' + successMessage + '</div>';
+            document.getElementById('donationForm').style.display = 'none';
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        } else {
+            var errorsHtml = '';
+            for (var key in data.errors) {
+                if (Array.isArray(data.errors[key])) {
+                    errorsHtml += '<p>' + data.errors[key].join(', ') + '</p>';
+                } else {
+                    errorsHtml += '<p>' + data.errors[key] + '</p>';
+                }
             }
+            document.getElementById('messageContainer').innerHTML = '<div class="alert alert-danger">' + errorsHtml + '</div>';
         }
-        document.getElementById('messageContainer').innerHTML = '<div class="alert alert-danger">' + errorsHtml + '</div>';
-    }
     })
     .catch(error => {
         console.error('Error:', error);
+        document.getElementById('messageContainer').innerHTML = '<div class="alert alert-danger">An error occurred while processing your request.</div>';
     });
-    document.getElementById('donationAmount').addEventListener('input', function() {
-    document.getElementById('messageContainer').innerHTML = '';
-});
 });
 
-    </script>
+    document.getElementById('donationAmount').addEventListener('input', function() {
+        document.getElementById('messageContainer').innerHTML = '';
+    });
+ </script>
 </body>
 </html>
 

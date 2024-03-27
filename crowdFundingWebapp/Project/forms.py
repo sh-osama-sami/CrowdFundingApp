@@ -31,11 +31,15 @@ class DonationForm(forms.Form):
         if project:
             if project.current_amount is None:
                 project.current_amount = 0
-            if project.current_amount + donation_amount <= project.total_target:
+            if project.current_amount + donation_amount < project.total_target:
+                project.current_amount += donation_amount
+                project.is_active = 1
+                project.save() 
+                self.success_message = f'Thank you for your donation of ${donation_amount}.'
+            elif project.current_amount + donation_amount == project.total_target:
                 project.current_amount += donation_amount
                 project.is_active = 0
                 project.save() 
-                self.success_message = f'Thank you for your donation of ${donation_amount}.'
             else:
                 raise forms.ValidationError('Sorry, the donation amount exceeds the project total target. Please enter a smaller amount.')
         else:
