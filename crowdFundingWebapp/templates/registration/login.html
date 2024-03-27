@@ -15,7 +15,14 @@
     {% for message in messages %}
         <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% endif %}
 " role="alert">
+
             {{ message }}
+
+        </div>
+        <div>
+            {% if message.tags == 'error' %}
+                <a href="{% url 'resend_verification_email' form.username.value %}" class="btn btn-primary">Resend Verification Email</a>
+            {% endif %}
         </div>
     {% endfor %}
 {% endif %}

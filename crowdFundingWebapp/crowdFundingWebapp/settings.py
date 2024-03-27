@@ -28,6 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
 # Application definition
 
 INSTALLED_APPS = [
@@ -79,8 +80,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
         'NAME': 'crowdfundingdb',
-        'USER': 'alaamoh',
-        'PASSWORD': 'iti123456789_',  # change based on your mysql password
+        'USER': 'root',
+        'PASSWORD': 'meme1357',  # change based on your mysql password
         'HOST': 'localhost',
         'PORT': '3306',
     }
