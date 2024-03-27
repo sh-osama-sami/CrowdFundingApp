@@ -106,7 +106,10 @@ def admin_project_details(request,project_id):
     project = get_object_or_404(Project, id=project_id)
     reports = project.reports.all()
     tags = project.tags.all()
-    return render(request, 'admin/admin_project_details.html', {'project': project, 'reports': reports , 'tags':tags})
+    ratings = Rating.objects.filter(project=project)
+    average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+    return render(request, 'admin/admin_project_details.html', 
+                  {'project': project, 'reports': reports , 'tags':tags, 'average_rating': average_rating,'noOfRating': project.total_rating_count,})
 
 def error_page(request):
     error_message = 'An error occurred.'
