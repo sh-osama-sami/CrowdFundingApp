@@ -256,15 +256,23 @@ def reply_comment(request, parent_id):
     if request.method == 'POST':
         form = ReplyForm(request.POST)  # Using the correct form
         if form.is_valid():
-            reply_text = form.cleaned_data['text']  # Assuming the field in the form is named 'text'
-            user = request.user  # Assuming the user is authenticated
-            reply_comment = Reply.objects.create(comment=parent_comment, user=user, text=reply_text)
-            messages.success(request, 'Reply added successfully.')
+            reply_text = form.cleaned_data['text']
+            user = request.user.customuser   # Get the user object from the request
+            if isinstance(user, get_user_model()):  # Check if the user object is an instance of CustomUser
+                # Create a new Reply object but don't save it yet
+                reply_comment = Reply(comment=parent_comment, user=user, text=reply_text)
+                # Save the reply_comment object to the database
+                reply_comment.save()
+                messages.success(request, 'Reply added successfully.')
+                return redirect('project_details', pk=project.pk)  # Redirect to project details page
+            else:
+                messages.error(request, 'Error creating reply. Please try again.')
         else:
             messages.error(request, 'Error creating reply. Please try again.')
     else:
         messages.error(request, 'Invalid request method.')
 
+    # Redirect to project details page in case of GET request or form validation errors
     return redirect('project_details', pk=project.pk)
 
 # ========================================================================================================================
