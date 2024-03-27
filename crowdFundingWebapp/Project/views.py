@@ -1,11 +1,11 @@
 from django import forms
 from .forms import CategoryForm, DonationForm, ProjectForm, ProjectImageForm, TagForm, CommentForm, ReportForm, \
     ReportCommentForm, \
-    UpdateProjectImageForm, UpdateTagForm, RatingForm
+    UpdateProjectImageForm, UpdateTagForm, RatingForm,ReplyForm
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Category, Project, ProjectImage, Tag, Report, Comment, ReportComment, Rating
+from .models import Category, Project, ProjectImage, Tag, Report, Comment, ReportComment, Rating, Reply
 from django.contrib.auth.decorators import login_required
 from authentication.models import CustomUser
 from django.http import JsonResponse
@@ -111,9 +111,11 @@ def admin_project_details(request,project_id):
     return render(request, 'admin/admin_project_details.html', 
                   {'project': project, 'reports': reports , 'tags':tags, 'average_rating': average_rating,'noOfRating': project.total_rating_count,})
 
+
+
 def error_page(request):
     error_message = 'An error occurred.'
-    return render(request, 'error_page.html', {'error_message': error_message})
+    return render(request, 'Project/error_page.html', {'error_message': error_message})
 
 
 
@@ -245,6 +247,25 @@ def report_comment(request, comment_id):
     context = {'report_comment_form': form, 'already_reported': already_reported}
     return render(request, 'Project/report_comment.html', context)
 
+
+@login_required
+def reply_comment(request, parent_id):
+    parent_comment = get_object_or_404(Comment, pk=parent_id)
+    project = parent_comment.project  # Get the project related to the parent comment
+
+    if request.method == 'POST':
+        form = ReplyForm(request.POST)  # Using the correct form
+        if form.is_valid():
+            reply_text = form.cleaned_data['text']  # Assuming the field in the form is named 'text'
+            user = request.user  # Assuming the user is authenticated
+            reply_comment = Reply.objects.create(comment=parent_comment, user=user, text=reply_text)
+            messages.success(request, 'Reply added successfully.')
+        else:
+            messages.error(request, 'Error creating reply. Please try again.')
+    else:
+        messages.error(request, 'Invalid request method.')
+
+    return redirect('project_details', pk=project.pk)
 
 # ========================================================================================================================
 # CRUD operations
@@ -449,7 +470,8 @@ def donate(request, pk):
         if form.is_valid():
             try:
                 form.save(project)
-                return JsonResponse({'success': True})
+                success_message = f'Thank you for your donation of ${form.cleaned_data["donation_amount"]}.'
+                return JsonResponse({'success': True, 'success_message': success_message})
             except forms.ValidationError as e:
                 errors = {'detail': str(e)}
                 return JsonResponse({'success': False, 'errors': errors})
