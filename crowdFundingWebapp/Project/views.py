@@ -39,8 +39,12 @@ def create_category(request):
 @login_required
 def select_featured_projects(request):
     projects = Project.objects.all()
-    categories = Category.objects.all()
-    return render(request, 'admin/featured_project.html', {'projects': projects, 'categories': categories})
+    for project in projects:
+        if project.total_target > 0:
+            project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
+        else:
+            project.progress_percentage = 0 
+    return render(request, 'admin/featured_project.html', {'projects': projects })
 
 
 @csrf_exempt
@@ -98,22 +102,11 @@ def admin_ignore_reports(request, project_id):
         return redirect('admin_home')
     return render(request, 'admin/ignore_reports_confirmation.html', {'project': project})
 
-# @login_required
-# def admin_home(request):
-#     active_projects_count = Project.objects.filter(is_active=1)
-#     non_active_projects_count = Project.objects.filter(is_active=0).count()
-#     print("count: ",active_projects_count)
-#     return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count, 'non_active_projects_count': non_active_projects_count})
-
-# def list_latest_featured_projects(request):
-#     # featured_projects = Project.objects.filter(is_featured=True).order_by('-created_at')[:5]
-#     # return render(request, 'admin/latest_featured_projects.html', {'featured_projects': featured_projects})
-#     print(1)
-
-# def list_categories(request):
-#     # categories = Category.objects.all()
-#     # return render(request, 'admin/list_categories.html', {'categories': categories})
-#     print(1)
+def admin_project_details(request,project_id):
+    project = get_object_or_404(Project, id=project_id)
+    reports = project.reports.all()
+    tags = project.tags.all()
+    return render(request, 'admin/admin_project_details.html', {'project': project, 'reports': reports , 'tags':tags})
 
 
 def project_list(request):
