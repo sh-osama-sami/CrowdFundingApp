@@ -110,13 +110,16 @@ def admin_project_details(request,project_id):
 
 
 def project_list(request):
-    projects = Project.objects.all()
-    for project in projects:
-        if project.total_target > 0:
-            project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
-        else:
-            project.progress_percentage = 0  # To avoid division by zero
-    return render(request, 'Project/project_list.html', {'projects': projects})
+    try:
+        projects = Project.objects.all()
+        for project in projects:
+            if project.total_target > 0:
+                project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
+            else:
+                project.progress_percentage = 0  # To avoid division by zero
+        return render(request, 'Project/project_list.html', {'projects': projects})
+    except ObjectDoesNotExist:
+        return render(request, 'projects/error.html')
 
 
 def project_details(request, pk):
