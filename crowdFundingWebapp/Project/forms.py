@@ -1,5 +1,5 @@
 from django import forms
-from .models import Category, Project, Tag, Comment
+from .models import Category, Project, Tag, Comment, Reply
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator, ValidationError
 from django.utils import timezone
 from .models import Project, ProjectImage, Tag, Rating
@@ -241,6 +241,11 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['text']
   
+class ReplyForm(forms.ModelForm):
+    class Meta:
+        model = Reply
+        fields = ['text']
+
         
 class ReportCommentForm(forms.Form):
     reason = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter reason for reporting'}))
