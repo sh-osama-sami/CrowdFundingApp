@@ -102,6 +102,17 @@ class Comment(models.Model):
         return f'Comment by {self.user.username} on {self.project.title}'
 
 
+class Reply(models.Model):
+    comment = models.ForeignKey(Comment, related_name='replies', on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Reply by {self.user.username} on {self.comment}'
+
+
+
 class ReportComment(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
