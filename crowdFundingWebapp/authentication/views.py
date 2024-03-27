@@ -2,7 +2,10 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
+from .forms import RegistrationForm
 from django.db.models import Count
 from Project.models import Project
 from .forms import RegistrationForm, UserProfileForm
@@ -18,22 +21,31 @@ def profile(request):
     return redirect('home')
 
 
+
+def error_page(request):
+    error_message = 'An error occurred.'
+    return render(request, 'Project/error_page.html', {'error_message': error_message})
+
+
 # render and handle registration form
 def register(request):
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST, request.FILES)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-            verification_email(request, user)
-            messages.success(request,
-                             'A verification email has been sent to your email address. Please verify your email.')
-            return redirect('register')  # Redirect to the same page to display the message
+    try:
+        if request.method == 'POST':
+            form = RegistrationForm(request.POST, request.FILES)
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.is_active = False
+                user.save()
+                verification_email(request, user)
+                messages.success(request, 'A verification email has been sent to your email address. Please verify your email.')
+                return redirect('register')  # Redirect to the same page to display the message
+        else:
+            form = RegistrationForm()
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'An error occurred during registration.'})
 
-    else:
-        form = RegistrationForm()
     return render(request, 'registration/register.html', {'form': form})
+
 
 
 # check if the user has activated his account before login
