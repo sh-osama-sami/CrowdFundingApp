@@ -80,47 +80,56 @@ def register(request):
 
 
 def signin(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                return redirect('home')
+    try:
+        if request.method == 'POST':
+            form = AuthenticationForm(data=request.POST)
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect('home')
+                else:
+                    messages.error(request, 'Your account is not activated. Please verify your email.')
             else:
-                messages.error(request, 'Your account is not activated. Please verify your email.')
+                print(user)
+                messages.info(request, 'Invalid username or password.')
         else:
-            print(user)
-            messages.info(request, 'Invalid username or password.')
-    else:
-        form = AuthenticationForm()
+            form = AuthenticationForm()
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'An error occurred during login.'})
     return render(request, 'registration/login.html', {'form': form})
 
 
 def resend_verification_email(request, username):
-    user = User.objects.get(username=username)
-    print(user)
-    verification_email(request, user)
-    messages.success(request, 'A verification email has been sent to your email address. Please verify your email.')
+    try:
+        user = User.objects.get(username=username)
+        print(user)
+        verification_email(request, user)
+        messages.success(request, 'A verification email has been sent to your email address. Please verify your email.')
+    except ObjectDoesNotExist:
+        messages.error(request, 'User does not exist.')
     return redirect('login')  # Redirect to the same page to display the message
 
 
 def verification_email(request, user):
-    subject = 'Verify your email address for Crowd Funding'
-    verification_token = generate_verification_token(user.id)
-    verification_link = request.build_absolute_uri('/authentication/verify/{}/{}'.format(user.id, verification_token))
-    message = 'Thank you for creating an account! Please verify your email address by clicking the link below:\n{}'.format(
-        verification_link)
-    from_email = 'sherry.osama.sami@gmail.com'
-    recipient_list = [user.email]
-    send_mail(subject, message, from_email, recipient_list)
+    try:
+        subject = 'Verify your email address for Crowd Funding'
+        verification_token = generate_verification_token(user.id)
+        verification_link = request.build_absolute_uri('/authentication/verify/{}/{}'.format(user.id, verification_token))
+        message = 'Thank you for creating an account! Please verify your email address by clicking the link below:\n{}'.format(
+            verification_link)
+        from_email = 'sherry.osama.sami@gmail.com'
+        recipient_list = [user.email]
+        send_mail(subject, message, from_email, recipient_list)
+    except Exception as e:
+        return render(request, 'Project/error_page.html', {'error_message': str(e)})
 
 
 def generate_verification_token(user_id):
     # Generate a token based on user_id and current timestamp
-    timestamp = timezone.now() + timedelta(hours=24)  # Token expires after 24 hours
+    timestamp = timezone.now() + timedelta(minutes=1)  # Token expires after 24 hours
     token = '{}_{}'.format(user_id, timestamp.timestamp())
     return token
 

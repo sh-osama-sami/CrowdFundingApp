@@ -436,9 +436,12 @@ def user_projects(request):
 
 
 def home(request):
-    projects = Project.objects.all().filter(is_active=True).order_by('-created_at')[:5]
-    featured_projects = Project.objects.filter(is_featured=True , is_active=True)
-    highest_rated_projects = Project.objects.filter(is_active=True).annotate(avg_rating=Avg('rating__rating')).order_by('-avg_rating')[:5]
+    try:
+        projects = Project.objects.all().filter(is_active=True).order_by('-created_at')[:5]
+        featured_projects = Project.objects.filter(is_featured=True , is_active=True)
+        highest_rated_projects = Project.objects.filter(is_active=True).annotate(avg_rating=Avg('rating__rating')).order_by('-avg_rating')[:5]
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'Error retrieving projects.'})
     return render(request, 'Home/home.html', {'projects': projects, 'featured_projects': featured_projects
                                               , 'highest_rated_projects': highest_rated_projects})
 
@@ -538,15 +541,18 @@ def rate_project(request, project_id):
 
 
 def search_helper(request):
-    search_query = request.GET.get('search')
-    projects = Project.objects.all()
+    try:
+        search_query = request.GET.get('search')
+        projects = Project.objects.all()
 
-    if search_query:
-        projects = projects.filter(
-            Q(title__icontains=search_query) |
-            Q(tags__name__icontains=search_query) |
-            Q(category__name__icontains=search_query)
-        ).distinct()
+        if search_query:
+            projects = projects.filter(
+                Q(title__icontains=search_query) |
+                Q(tags__name__icontains=search_query) |
+                Q(category__name__icontains=search_query)
+            ).distinct()
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'Error retrieving projects.'})
 
     # Render the search results template with the filtered projects
     html = render(request, 'Home/search_results.html',
@@ -555,11 +561,21 @@ def search_helper(request):
 
 
 def all_categories(request):
-    categories = Category.objects.all().values('id', 'name')
+    try:
+        categories = Category.objects.all().values('id', 'name')
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'Error retrieving categories.'})
     return JsonResponse(list(categories), safe=False)
 
 
 def category_projects(request, category_id):
-    category = Category.objects.get(pk=category_id)
-    projects = Project.objects.filter(category=category)
+    try:
+        category = Category.objects.get(pk=category_id)
+        projects = Project.objects.filter(category=category)
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'Category not found.'})
     return render(request, 'category/category_projects.html', {'projects': projects})
+
+
+def custom_404_view(request, exception):
+    return render(request, 'Project/error_page.html', {'error_message': 'Url not found'},status=404)
