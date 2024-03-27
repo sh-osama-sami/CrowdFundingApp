@@ -94,12 +94,18 @@
             font-size: 18px; /* Increase the font size of the report comment button */
             margin-left: auto; /* Align the button to the right */
         }
-
-        /* Style for add comment form */
         .add-comment-form {
-            margin-left: 0; /* Ensure the form aligns with the comments */
-            width: 100%; /* Make the form take up the full width */
+            width: 70%; /* Adjust the width as needed */
+            margin-left: 0; /* Center the form horizontally */
+            padding: 20px; /* Add padding for spacing */
+            border-radius: 8px; /* Optional: Add border radius for rounded corners */
         }
+    
+    
+        .comment-input {
+            width: 100%; /* Make the text input full-width within the form */
+        }
+
 
         /* Style for alert messages */
         .alert {
@@ -123,6 +129,7 @@
 <body>
     <div class="container">
         <h1 style="text-align: center;">{{ project.title }}</h1>
+        
         <!-- Display average rating -->
         {% if average_rating %}
         <div style="display: flex; align-items: center;">
@@ -171,6 +178,7 @@
             <p><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
         </div>
         <div class="col-md-6">
+
             <!-- Donation Form Section -->
             {% if user.is_authenticated %}
             {% if project.get_status == 'Active' %}
@@ -209,6 +217,7 @@
                 This project has been reported. We are reviewing it. Thank you for your feedback.
             </div>
             {% else %}
+
             <!-- Report Button and Form -->
             <button id="reportButton" class="btn btn-danger">Report Project</button>
             <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
@@ -223,6 +232,7 @@
             </form>
             {% endif %}
             {% else %}
+
             <!-- Report Button and Form -->
             <button id="reportButton" class="btn btn-danger">Report Project</button>
             <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
@@ -236,6 +246,7 @@
                 </div>
             </form>
             {% endif %}
+
             <!-- Display stars for rating -->
             <p style="margin-bottom: 0;">your rating:</p>
             <div id="rating-section">
@@ -274,15 +285,18 @@
                     <h5 class="card-title">{{ comment.user.username }}</h5>
                     <p class="card-text comment-text">{{ comment.text }}</p>
                     <p class="card-text"><small class="text-muted">{{ comment.created_at }}</small></p>
+
                     <!-- Reporting button for each comment -->
                     {% if user.is_authenticated %}
                     {% if not comment.is_reported_by_user %}
+
                     <!-- Display the "Report Comment" button and form for comments not reported by the user -->
                     <form method="post" action="{% url 'report_comment' comment_id=comment.id %}" class="report-comment-form">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger btn-sm float-end report-comment-btn">Report Comment</button>
                     </form>
                     {% else %}
+
                     <!-- Display the message "You have already reported this comment." for comments reported by the user -->
                     <div class="alert alert-warning mt-3" role="alert">
                         You have already reported this comment.
@@ -298,15 +312,18 @@
                     {% endfor %}
                 </div>
 
+
                 <!-- Add Comment Form (for logged-in users only) -->
                 {% if user.is_authenticated %}
                 <div class="mt-4">
                     <h2 class="mb-3">Add Comment</h2>
-                    <form method="post" action="{% url 'project_details' pk=project.id %}" class="add-comment-form">
+                    
+                     <form method="post" action="{% url 'project_details' pk=project.id %}" class="add-comment-form">
                         {% csrf_token %}
                         {{ comment_form.as_p }}
                         <button type="submit" class="btn btn-primary">Add Comment</button>
-                    </form>
+                    </form>  
+                    
                 </div>
                 {% else %}
                 <div class="alert alert-warning mt-4" role="alert">
@@ -315,7 +332,6 @@
                 {% endif %}
             </div>
         </div>
-
 
         
         <!-- Display similar projects -->
