@@ -108,6 +108,10 @@ def admin_project_details(request,project_id):
     tags = project.tags.all()
     return render(request, 'admin/admin_project_details.html', {'project': project, 'reports': reports , 'tags':tags})
 
+def error_page(request):
+    error_message = 'An error occurred.'
+    return render(request, 'error_page.html', {'error_message': error_message})
+
 
 def project_list(request):
     try:
@@ -121,9 +125,12 @@ def project_list(request):
     except ObjectDoesNotExist:
         return render(request, 'projects/error.html')
 
-
 def project_details(request, pk):
-    project = get_object_or_404(Project, id=pk)
+    try:
+        project = Project.objects.get(id=pk)
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'Project not found.'})
+
     similar_projects = Project.objects.filter(tags__in=project.tags.all()).exclude(pk=pk).distinct()[:4]
     is_reported = project.is_reported  # Check if the project is reported
     report_count = project.reports.count()
@@ -136,7 +143,10 @@ def project_details(request, pk):
         user_rating = Rating.objects.filter(user=request.user, project=project).first()
 
     # Fetch comments related to the project
-    comments = Comment.objects.filter(project=project)  
+    try:
+        comments = Comment.objects.filter(project=project)
+    except ObjectDoesNotExist:
+        comments = []
 
     # Check if the current user has reported the project
     user_has_reported = False
