@@ -5,38 +5,43 @@
 {% block 'content' %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Details</title>
+
     <!-- Include Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Custom CSS for adjusting image sizes */
-    .carousel-inner .carousel-item {
-        height: 300px; /* Set a fixed height for the carousel container */
-    }
-    .carousel-inner .carousel-item img {
-        height: 100%; /* Set the image height to 100% to fit within the container */
-        width: auto; /* Set width to auto to maintain aspect ratio */
-        object-fit: contain; /* Resize the image to fit the container without cropping */
-    }
+        .carousel-inner .carousel-item {
+            height: 300px; /* Set a fixed height for the carousel container */
+        }
 
-    /* Custom CSS for carousel control arrows */
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        color: red; /* Change the color of the carousel control icons */
-    }
+        .carousel-inner .carousel-item img {
+            height: 100%; /* Set the image height to 100% to fit within the container */
+            width: auto; /* Set width to auto to maintain aspect ratio */
+            object-fit: contain; /* Resize the image to fit the container without cropping */
+        }
+
+        /* Custom CSS for carousel control arrows */
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            color: red; /* Change the color of the carousel control icons */
+        }
 
         /* Custom CSS for smaller main project image */
         .main-project-image {
             max-width: 300px; /* Set the maximum width */
             height: auto; /* Maintain aspect ratio */
         }
+
         /* CSS for comment reporting button */
         .report-comment-btn {
             float: right;
         }
+
         /* Style for star icons */
         .star {
             cursor: pointer;
@@ -47,14 +52,17 @@
         .star.active {
             color: gold;
         }
+
         /* CSS to display stars and rate button inline */
         #rating-section {
             display: flex; /* Use flexbox to align items */
             align-items: center; /* Align items vertically */
         }
+
         #rating-stars {
             margin-right: 10px; /* Add some space between stars and the button */
         }
+
         /* Style for rate button */
         #rating-button {
             background-color: gold; /* Set the background color to gold */
@@ -64,117 +72,169 @@
             cursor: pointer; /* Change cursor on hover */
             border-radius: 15px;
         }
+
+        /* Custom CSS for comments section */
+        .comments-section {
+            margin-left: 0; /* Ensure the comments start from the left */
+        }
+
+        /* Style for comment cards */
+        .comment-card {
+            width: 100%; /* Make the comment cards take up the full width */
+            margin-bottom: 20px; /* Add some space between comment cards */
+        }
+
+        /* Style for comment text */
+        .comment-text {
+            font-size: 20px; /* Increase the font size of comment text */
+        }
+
+        /* Style for report comment button */
+        .report-comment-btn {
+            font-size: 18px; /* Increase the font size of the report comment button */
+            margin-left: auto; /* Align the button to the right */
+        }
+
+        /* Style for add comment form */
+        .add-comment-form {
+            margin-left: 0; /* Ensure the form aligns with the comments */
+            width: 100%; /* Make the form take up the full width */
+        }
+
+        /* Style for alert messages */
+        .alert {
+            font-size: 20px; /* Increase the font size of alert messages */
+        }
+
+        /* Custom CSS for similar projects section */
+        .similar-projects-section {
+            margin-left: 0; /* Ensure similar projects start from the left */
+        }
+
+        /* Style for similar project cards */
+        .similar-project-card {
+            width: 100%; /* Make the similar project cards take up the full width */
+            margin-bottom: 20px; /* Add some space between similar project cards */
+        }
     </style>
+
 </head>
+
 <body>
     <div class="container">
-        <h1>{{ project.title }}</h1>
+        <h1 style="text-align: center;">{{ project.title }}</h1>
         <!-- Display average rating -->
         {% if average_rating %}
-            <div style="display: flex; align-items: center;">
+        <div style="display: flex; align-items: center;">
             <p>Average Rating: {{ average_rating }}</p>
             <span style="padding: 5px; margin-bottom: 13px; color:gold; font-size: 20px;" class="single_star">★</span>
             <p>(no. of ratings: {{noOfRating}})</p>
-            </div>
+        </div>
         {% endif %}
-        <p>{{ project.description }}</p>
+
+
+        <!-- Description Section -->
+        <p class="lead">{{ project.description }}</p>
 
         <!-- Image Slider using Bootstrap Carousel -->
-                            <div id="carouselExample{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    {% for image in project.images.all %}
-                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                            <img src="{{ image.image_url }}" class="d-block w-100" alt="{{ project.title }}">
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample{{ project.id }}" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExample{{ project.id }}" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
-        <p class="card-text"><strong>Category:</strong> {{ project.category }}</p>
-        <p class="card-text"><strong>Description:</strong> {{ project.details }}</p>
-        <p class="card-text"><strong>Creator:</strong> {{ project.creator }}</p>
-        <p class="card-text"><strong>Current Amount:</strong> ${{ project.current_amount }}</p>
-        <p class="card-text"><strong>Total Target:</strong> ${{ project.total_target }}</p>
-        <p class="card-text"><strong>Start Time:</strong> {{ project.start_time }}</p>
-        <p class="card-text"><strong>End Time:</strong> {{ project.end_time }}</p>
-        <p class="card-text"><strong>Owner:</strong> {{ project.creator.username }}</p>
-        <p class="card-text"><strong>Status:</strong> {{ project.get_status }}</p>
-        <p class="card-text"><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-        {% if user.is_authenticated %}
+        <div id="carouselExample{{ project.id }}" class="carousel slide mb-4" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for image in project.images.all %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ image.image_url }}" class="d-block w-100" alt="{{ project.title }}">
+                    </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample{{ project.id }}" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExample{{ project.id }}" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+
+    <!-- Project Details Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h3 class="mb-3">Project Details</h3>
+            <p><strong>Category:</strong> {{ project.category }}</p>
+            <p><strong>Description:</strong> {{ project.details }}</p>
+            <p><strong>Creator:</strong> {{ project.creator }}</p>
+            <p><strong>Current Amount:</strong> ${{ project.current_amount }}</p>
+            <p><strong>Total Target:</strong> ${{ project.total_target }}</p>
+            <p><strong>Start Time:</strong> {{ project.start_time }}</p>
+            <p><strong>End Time:</strong> {{ project.end_time }}</p>
+            <p><strong>Owner:</strong> {{ project.creator.username }}</p>
+            <p><strong>Status:</strong> {{ project.get_status }}</p>
+            <p><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+        </div>
+        <div class="col-md-6">
+            <!-- Donation Form Section -->
+            {% if user.is_authenticated %}
             {% if project.get_status == 'Active' %}
-                <div class="col-md-4 text-md">
-                    <button type="button" id="donateButton" class="btn btn-success">Donate</button>
+            <h3 class="mb-3">Donate</h3>
+            <div class="alert alert-success mb-3" role="alert">
+                Thank you for supporting this project!
+            </div>
+            <form method="post" action="{% url 'donate' pk=project.id %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="donationAmount" class="form-label">Enter Donation Amount:</label>
+                    <input type="number" name="donation_amount" id="donationAmount" class="form-control" placeholder="Enter amount" required>
                 </div>
-                <div id="donationFormContainer">
-                    <div id="donationForm" style="display: none;">
-                        <form method="post" action="{% url 'donate' pk=project.id %}">
-                            {% csrf_token %}
-                            <input type="number" name="donation_amount" id="donationAmount" class="form-control" placeholder="Enter Donation Amount" required>
-                            <button type="submit" id="confirmDonation" class="btn btn-primary">Confirm Donation</button>
-                        </form>
-                    </div>
-                    <div id="messageContainer"></div>
-                </div>
+                <button type="submit" class="btn btn-primary">Confirm Donation</button>
+            </form>
             {% endif %}
-            {% if project.get_status == 'Suspended' %}
-            <div class="alert alert-warning" role="alert">
-                This project is Suspended Now! You can't Donate to it .
-            </div>
-            {% endif %}
-            {% if project.get_status == 'Reached Target' %}
-            <div class="alert alert-success" role="alert">
-                This project already reached Target! You can't Donate to it .
-            </div>
-            {% endif %}
-        {% else %}
-            <div class="alert alert-warning" role="alert">
-                You must be logged in to Donate to this project. Please <a href="{% url 'login' %}">log in</a>
-            </div>
-        {% endif %}
-        
-        
-        <!-- Add Rating Form -->
-        <!-- <form method="post" action="{% url 'rate_project' project.id %}">
-            {% csrf_token %}
-            {{ rating_form.as_p }}
-            <button type="submit">Send Rating</button>
-        </form> -->
-
-
-        {% if user.is_authenticated %}
-            {% if is_reported %}
-                {% if user_has_reported %}
-                    <div class="alert alert-danger" role="alert">
-                        This project has been reported. We are reviewing it. Thank you for your feedback.
-                    </div>
-                {% else %}
-                    <!-- Report Button and Form -->
-                    <button id="reportButton" class="btn btn-danger">Report Project</button>
-                    <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
-                        {% csrf_token %}
-                        <div id="reasonField" style="display: none;">
-                            <input type="text" name="reason" placeholder="Enter reason for reporting">
-                            <button type="submit">Submit Reason</button>
-                        </div>
-                    </form>
-                {% endif %}
             {% else %}
-                <!-- Report Button and Form -->
-                <button id="reportButton" class="btn btn-danger">Report Project</button>
-                <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
-                    {% csrf_token %}
-                    <div id="reasonField" style="display: none;">
-                        <input type="text" name="reason" placeholder="Enter reason for reporting">
-                        <button type="submit">Submit Reason</button>
+            <div class="alert alert-warning mb-3" role="alert">
+                You must be logged in to donate to this project. Please <a href="{% url 'login' %}">log in</a>.
+            </div>
+            {% endif %}
+
+
+            <!-- Add Rating Form -->
+            <!-- <form method="post" action="{% url 'rate_project' project.id %}">
+                {% csrf_token %}
+                {{ rating_form.as_p }}
+                <button type="submit">Send Rating</button>
+            </form> -->
+
+
+            {% if user.is_authenticated %}
+            {% if is_reported %}
+            {% if user_has_reported %}
+            <div class="alert alert-danger" role="alert">
+                This project has been reported. We are reviewing it. Thank you for your feedback.
+            </div>
+            {% else %}
+            <!-- Report Button and Form -->
+            <button id="reportButton" class="btn btn-danger">Report Project</button>
+            <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
+                {% csrf_token %}
+                <div id="reasonField" style="display: none;">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Enter reason for reporting:</label>
+                        <input type="text" name="reason" id="reason" class="form-control" placeholder="Enter reason" required>
                     </div>
-                </form>
+                    <button type="submit" class="btn btn-primary">Submit Reason</button>
+                </div>
+            </form>
+            {% endif %}
+            {% else %}
+            <!-- Report Button and Form -->
+            <button id="reportButton" class="btn btn-danger">Report Project</button>
+            <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
+                {% csrf_token %}
+                <div id="reasonField" style="display: none;">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Enter reason for reporting:</label>
+                        <input type="text" name="reason" id="reason" class="form-control" placeholder="Enter reason" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Reason</button>
+                </div>
+            </form>
             {% endif %}
             <!-- Display stars for rating -->
             <p style="margin-bottom: 0;">your rating:</p>
@@ -202,93 +262,100 @@
 
         <p>Number of Reports: {{ report_count }}</p>
 
-
+        </div>
 
         
-
-       <!-- Display existing comments -->
-    <div>
-        <h2>Comments</h2>
-        {% for comment in project.comments.all %}
-            <div class="card mb-3">
+         <!-- Display comments -->
+         <div class="mt-5 comments-section">
+            <h2 class="mb-3">Comments</h2>
+            {% for comment in project.comments.all %}
+            <div class="card mb-3 comment-card">
                 <div class="card-body">
-                    <h5 class="card-text">{{ comment.text }}</h5>
-                    <p class="card-title">{{ comment.user.username }}</p>
+                    <h5 class="card-title">{{ comment.user.username }}</h5>
+                    <p class="card-text comment-text">{{ comment.text }}</p>
                     <p class="card-text"><small class="text-muted">{{ comment.created_at }}</small></p>
                     <!-- Reporting button for each comment -->
                     {% if user.is_authenticated %}
-                        {% if not comment.is_reported_by_user %}
-                            <!-- Display the "Report Comment" button and form for comments not reported by the user -->
-                            <form method="post" action="{% url 'report_comment' comment_id=comment.id %}" class="report-comment-form">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-link report-comment-btn">Report Comment</button>
-                            </form>
-                        {% else %}
-                            <!-- Display the message "You have already reported this comment." for comments reported by the user -->
-                            <div class="alert alert-warning" role="alert">
-                                You have already reported this comment.
-                            </div>
-                        {% endif %}
+                    {% if not comment.is_reported_by_user %}
+                    <!-- Display the "Report Comment" button and form for comments not reported by the user -->
+                    <form method="post" action="{% url 'report_comment' comment_id=comment.id %}" class="report-comment-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm float-end report-comment-btn">Report Comment</button>
+                    </form>
+                    {% else %}
+                    <!-- Display the message "You have already reported this comment." for comments reported by the user -->
+                    <div class="alert alert-warning mt-3" role="alert">
+                        You have already reported this comment.
+                    </div>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>
-        {% empty %}
-            <p>No comments yet.</p>
-        {% endfor %}
-    </div>
-        
-        <!-- Add Comment Form (for logged-in users only) -->
-        {% if user.is_authenticated %}
-            <div class="mt-4">
-                <form method="post" action="{% url 'project_details' pk=project.id %}">
-                    {% csrf_token %}
-                    {{ comment_form.as_p }}
-                    <button type="submit" class="btn btn-primary">Add Comment</button>
-                </form>
+            {% empty %}
+                    <div class="alert alert-info" role="alert">
+                        No comments yet.
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Add Comment Form (for logged-in users only) -->
+                {% if user.is_authenticated %}
+                <div class="mt-4">
+                    <h2 class="mb-3">Add Comment</h2>
+                    <form method="post" action="{% url 'project_details' pk=project.id %}" class="add-comment-form">
+                        {% csrf_token %}
+                        {{ comment_form.as_p }}
+                        <button type="submit" class="btn btn-primary">Add Comment</button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="alert alert-warning mt-4" role="alert">
+                    You must be logged in to add or report a comment. <a href="{% url 'login' %}" class="alert-link">Login</a>
+                </div>
+                {% endif %}
             </div>
-        {% else %}
-            <p>You must be logged in to add or report a comment.</p>
-            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
-        {% endif %}
+        </div>
+
+
         
         <!-- Display similar projects -->
-<h2>Similar Projects</h2>
-<div class="row">
-    {% for similar_project in similar_projects %}
-        <div class="col-md-3">
-            <div class="card mb-3">
-                <!-- Image Slider using Bootstrap Carousel for similar projects too -->
-                <div id="carouselSimilar{{ similar_project.id }}" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        {% for image in similar_project.images.all %}
+        <h2>Similar Projects</h2>
+        <div class="row similar-projects-section">
+            {% for similar_project in similar_projects %}
+            <div class="col-md-3">
+                <div class="card mb-3 similar-project-card">
+                    <!-- Image Slider using Bootstrap Carousel for similar projects too -->
+                    <div id="carouselSimilar{{ similar_project.id }}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in similar_project.images.all %}
                             <div class="carousel-item {% if forloop.first %}active{% endif %}">
                                 <img src="{{ image.image_url }}" class="d-block w-100 main-project-image" alt="{{ similar_project.title }}">
                             </div>
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselSimilar{{ similar_project.id }}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselSimilar{{ similar_project.id }}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselSimilar{{ similar_project.id }}" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselSimilar{{ similar_project.id }}" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ similar_project.title }}</h5>
-                    <p class="card-text">{{ similar_project.description }}</p>
-                    <a href="{% url 'project_details' pk=similar_project.id %}" class="btn btn-primary">View Details</a>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ similar_project.title }}</h5>
+                        <p class="card-text">{{ similar_project.description }}</p>
+                        <a href="{% url 'project_details' pk=similar_project.id %}" class="btn btn-primary">View Details</a>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-    {% endfor %}
-</div>
 
     </div>
-
     <!-- Include Bootstrap JS -->
     <script>
+        // Handle report button click
         document.getElementById('reportButton').addEventListener('click', function() {
             document.getElementById('reportForm').style.display = 'block';
             document.getElementById('reasonField').style.display = 'block';
