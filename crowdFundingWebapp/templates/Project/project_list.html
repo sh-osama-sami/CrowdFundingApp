@@ -1,7 +1,33 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 {% block title %}Project List{% endblock %}
 {% block 'content' %}
 <style>
+    /* Add background image and opacity to the entire page */
+        body {
+            background-image: url("{% static 'images/background.jpg' %}"); /* Set the background image path */
+            background-size: cover; /* Cover the entire background with the image */
+            background-repeat: no-repeat; /* Prevent background image from repeating */
+            background-position: center center; /* Center the background image */
+            opacity: 0.9; /* Set the opacity for the background image */
+        }
+
+        body .container {
+            max-width: 80%; /* Set maximum width for the container (adjust as needed) */
+        }
+
+        /* Container styles */
+        .container {
+            font-size: 22px;
+            background-color: rgba(255, 255, 255, 0.9); /* Set the background color for the content container with opacity */
+            border-radius: 15px; /* Optional: Add border radius for rounded corners */
+            padding: 20px; /* Increase padding for content spacing */
+            margin-top: 20px; /* Increase margin to the top */
+            max-width: 3000px; /* Set maximum width for the container */
+            margin-left: auto; /* Center the container horizontally */
+            margin-right: auto; /* Center the container horizontally */
+        }
+    
     /* Custom CSS for adjusting image sizes */
     .carousel-inner .carousel-item {
         height: 300px; /* Set a fixed height for the carousel container */
