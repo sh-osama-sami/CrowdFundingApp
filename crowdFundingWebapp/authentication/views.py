@@ -43,7 +43,7 @@ def register(request):
                 verification_email(request, user)
                 messages.success(request,
                                  'A verification email has been sent to your email address. Please verify your email.')
-                return redirect('register')  # Redirect to the same page to display the message
+                return redirect('login')  # Redirect to the same page to display the message
         else:
             form = RegistrationForm()
     except ObjectDoesNotExist:

@@ -353,9 +353,9 @@ def create_project(request):
 def project_detail(request, project_id):
     try:
         project = get_object_or_404(Project, id=project_id)
-    except ObjectDoesNotExist:
+    except Exception as e:
         # Handle the case where the project does not exist
-        return render(request, 'projects/error.html', context={'error_message': 'Project does not exist.'})
+        return render(request, 'projects/error.html', context={'error_message': str(e)})
 
     # Calculate progress percentage and format to 2 decimal places
     if project.total_target > 0:
