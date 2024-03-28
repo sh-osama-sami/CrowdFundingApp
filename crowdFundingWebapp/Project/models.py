@@ -42,6 +42,7 @@ class Project(models.Model):
         ratings = Rating.objects.filter(project=self)
         self.total_rating_count = ratings.count()
         self.total_rating_value = sum(rating.rating for rating in ratings)
+        print(self.total_rating_value)
         self.save()
 
     def calculate_average_rating(self):
@@ -63,7 +64,7 @@ class Project(models.Model):
 class Rating(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], default=0)
 
     class Meta:
         unique_together = ('user', 'project')  # Ensure each user can rate a project only once

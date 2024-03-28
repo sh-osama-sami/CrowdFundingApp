@@ -544,6 +544,7 @@ def donate(request, pk):
 @login_required
 def rate_project(request, project_id):
     if request.method == 'POST':
+        print("hello")
         # Retrieve the rating value from the form
         rating_value = int(request.POST.get('rating', 0))
 
