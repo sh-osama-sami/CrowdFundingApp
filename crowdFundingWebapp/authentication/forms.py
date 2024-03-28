@@ -31,8 +31,10 @@ class RegistrationForm(UserCreationForm):
         mobile_phone = self.cleaned_data.get('mobile_phone')
         # Validate against Egyptian phone number format
         valid_prefixes = ['011', '010', '012', '015']
-        if not any(mobile_phone.startswith(prefix) for prefix in valid_prefixes) or len(mobile_phone) != 11:
-            raise ValidationError('Please enter a valid Egyptian phone number starting with 011, 010, 012, or 015.')
+        if not any(mobile_phone.startswith(prefix) for prefix in valid_prefixes):
+            raise ValidationError('Please enter a valid Egyptian phone number starting with 011, 010, 012, or 015')
+        if len(mobile_phone) != 11:
+            raise ValidationError('Please enter 11 digits!')
         return mobile_phone
 
 

@@ -303,7 +303,7 @@
                 <!-- Rating form -->
                 <form id="rating-form" method="POST" action="{% url 'rate_project' project_id=project.id %}">
                     {% csrf_token %}
-                    <input type="hidden" name="rating" id="rating-value" value="0">
+                    <input type="hidden" name="rating" id="rating-value" >
                     <button type="submit" id="rating-button">Rate</button>
                 </form>
             </div>
@@ -452,40 +452,51 @@
                 const ratingValueInput = document.getElementById('rating-value');
                 let userRating = parseInt("{{ user_rating.rating }}" || 0); // Fetch user's rating from context
                 let currentRating = userRating; // Track the current rating
-        
+                if (!ratingValueInput.value){
+                    ratingValueInput.value=currentRating;
+
+                }
                 stars.forEach(star => {
                     star.addEventListener('click', function() {
                         const value = parseInt(this.getAttribute('data-value'));
-                        console.log('Clicked star value:', value);
-                        currentRating = value; // Update the current rating
-                        ratingValueInput.value = currentRating;
-                        highlightStars(currentRating);
+                        if (value != 0 ) {
+                            console.log('Clicked star value:', value);
+                            currentRating = value; // Update the current rating
+                            ratingValueInput.value = currentRating;
+                            highlightStars(currentRating);
+                        }
                     });
                 });
-        
+
                 function highlightStars(value) {
                     stars.forEach(star => {
                         const starValue = parseInt(star.getAttribute('data-value'));
-                        console.log('Star value:', starValue);
                         // Check if starValue is less than or equal to currentRating to highlight stars
                         star.classList.toggle('active', starValue <= currentRating);
                     });
                 }
-        
                 // Submit rating form when the rate button is clicked
-                document.getElementById('rating-button').addEventListener('click', function() {
-                    // Update the user's rating when the rate button is clicked
-                    userRating = currentRating;
-                    console.log('User rating updated:', userRating);
-                    // Submit the rating form
-                    document.getElementById('rating-form').submit();
+                document.getElementById('rating-button').addEventListener('click', function(event) {
+                    // Prevent the default form submission
+                    event.preventDefault();
+
+                    // Check if a rating is selected
+                    if (currentRating === 0) {
+                        // If no rating is selected, alert the user or handle it in another way
+                        alert('Please select a rating before submitting.');
+                    } else {
+                        // Update the user's rating when the rate button is clicked
+                        userRating = currentRating;
+                        console.log('User rating updated:', userRating);
+                        // Submit the rating form
+                        document.getElementById('rating-form').submit();
+                    }
                 });
-        
                 // Highlight stars to display the user's previous rating when the page loads
                 highlightStars(userRating);
             });
         </script>
-    
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     

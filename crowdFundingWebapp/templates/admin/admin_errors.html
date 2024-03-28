@@ -1,0 +1,9 @@
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Error page{% endblock %}
+
+{% block 'content' %}
+    <h1>Error!</h1>
+    <p><strong>
+            {{ error_message }}</strong></p>
+    <a href="{% url 'admin_home' %}" class="btn btn-primary">Return to Home</a>
+{% endblock %}
