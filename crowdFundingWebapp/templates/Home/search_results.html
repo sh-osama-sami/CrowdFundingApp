@@ -10,12 +10,17 @@
                     <h5 class="card-title"> <b> {{ project.title }}</b></h5>
                     <p class="card-text"> by {{ project.creator }}</p>
                     {% if search_query not in project.title %}
-                       <p>Tags:
-                            {% for tag in project.tags.all %}
-                                {% if search_query in tag.name %}
-                                    {{ tag.name }}
-                                {% endif %}
-                            {% endfor %}
+                       <p>
+                            {% if search_query in project.category.name %}
+                               Category: {{ project.category.name }}
+                            {% else %}
+                                Tag:
+                                {% for tag in project.tags.all %}
+                                    {% if search_query in tag.name %}
+                                        {{ tag.name }}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
                        </p>
 
                     {% else %}
