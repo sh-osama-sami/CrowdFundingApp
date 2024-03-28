@@ -20,97 +20,121 @@ from authentication.views import admin_home
 
 @login_required
 def create_category(request):
-    categories = Category.objects.all()
-    form = CategoryForm()
-    if request.method == 'POST':
-        form = CategoryForm(request.POST)
-        if form.is_valid():
-            category_name = form.cleaned_data['name']
-            if Category.objects.filter(name=category_name).exists():
-                form.add_error('name', 'Category with this name already exists.')
-            else:
-                form.save()
-                return redirect('create_category')
-    else:
+    try:
+        categories = Category.objects.all()
         form = CategoryForm()
+        if request.method == 'POST':
+            form = CategoryForm(request.POST)
+            if form.is_valid():
+                category_name = form.cleaned_data['name']
+                if Category.objects.filter(name=category_name).exists():
+                    form.add_error('name', 'Category with this name already exists.')
+                else:
+                    form.save()
+                    return redirect('create_category')
+        else:
+            form = CategoryForm()
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
+
     return render(request, 'admin/create_category.html', {'categories': categories, 'form': form})
 
 
 @login_required
 def select_featured_projects(request):
-    projects = Project.objects.all()
-    for project in projects:
-        if project.total_target > 0:
-            project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
-        else:
-            project.progress_percentage = 0
-    return render(request, 'admin/featured_project.html', {'projects': projects })
+    try:
+        projects = Project.objects.all()
+        for project in projects:
+            if project.total_target > 0:
+                project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
+            else:
+                project.progress_percentage = 0
+        return render(request, 'admin/featured_project.html', {'projects': projects })
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
 
 
 @csrf_exempt
 def update_featured_status(request, project_id):
-    if request.method == 'POST':
-        try:
-            project = Project.objects.get(pk=project_id)
-            if project.is_featured:
-                project.is_featured = False
-                project.save()
-                return JsonResponse({'success': True, 'message': 'Project unfeatured'})
-            else:
-                featured_projects_count = Project.objects.filter(is_featured=True).count()
-                if featured_projects_count < 5:
-                    project.is_featured = True
+    try:
+        if request.method == 'POST':
+                project = Project.objects.get(pk=project_id)
+                if project.is_featured:
+                    project.is_featured = False
                     project.save()
-                    return JsonResponse({'success': True, 'message': 'Project featured'})
+                    return JsonResponse({'success': True, 'message': 'Project unfeatured'})
                 else:
-                    return JsonResponse({'success': False, 'error': 'Cannot feature more than 5 projects'}, status=400)
-        except Project.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Project does not exist'}, status=404)
+                    featured_projects_count = Project.objects.filter(is_featured=True).count()
+                    if featured_projects_count < 5:
+                        project.is_featured = True
+                        project.save()
+                        return JsonResponse({'success': True, 'message': 'Project featured'})
+                    else:
+                        return JsonResponse({'success': False, 'error': 'Cannot feature more than 5 projects'}, status=400)
+    except Project.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Project does not exist'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
 def report_details_admin(request,project_id):
-    project = get_object_or_404(Project, id=project_id)
-    reports = project.reports.all()
-    tags = project.tags.all()
-    return render(request, 'admin/admin_report_details.html', {'project': project, 'reports': reports , 'tags':tags})
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        reports = project.reports.all()
+        tags = project.tags.all()
+        return render(request, 'admin/admin_report_details.html', {'project': project, 'reports': reports , 'tags':tags})
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
 
 def admin_suspend_project(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    if request.method == 'POST':
-        project.is_active = False
-        project.save()
-        return redirect('admin_home')
-    return render(request, 'admin/suspend_project_confirmation.html', {'project': project})
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        if request.method == 'POST':
+            project.is_active = False
+            project.save()
+            return redirect('admin_home')
+        return render(request, 'admin/suspend_project_confirmation.html', {'project': project})
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
+
 
 def admin_delete_project(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    if request.method == 'POST':
-        project.delete()
-        return redirect('admin_home')
-    return render(request, 'admin/delete_project_confirmation.html', {'project': project})
-
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        if request.method == 'POST':
+            project.delete()
+            return redirect('admin_home')
+        return render(request, 'admin/delete_project_confirmation.html', {'project': project})
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
+    
 def admin_ignore_reports(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    report = get_object_or_404(Report, project_id=project_id)
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        report = get_object_or_404(Report, project_id=project_id)
 
-    if request.method == 'POST':
-        if project.current_amount < project.total_target:
-            project.is_active = True
-        project.is_reported = False
-        report.delete()
-        project.save()
-        return redirect('admin_home')
-    return render(request, 'admin/ignore_reports_confirmation.html', {'project': project})
+        if request.method == 'POST':
+            if project.current_amount < project.total_target:
+                project.is_active = True
+            project.is_reported = False
+            report.delete()
+            project.save()
+            return redirect('admin_home')
+        return render(request, 'admin/ignore_reports_confirmation.html', {'project': project})
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
 
 def admin_project_details(request,project_id):
-    project = get_object_or_404(Project, id=project_id)
-    reports = project.reports.all()
-    tags = project.tags.all()
-    ratings = Rating.objects.filter(project=project)
-    average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
-    return render(request, 'admin/admin_project_details.html',
-                  {'project': project, 'reports': reports , 'tags':tags, 'average_rating': average_rating,'noOfRating': project.total_rating_count,})
-
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        reports = project.reports.all()
+        tags = project.tags.all()
+        ratings = Rating.objects.filter(project=project)
+        average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+        return render(request, 'admin/admin_project_details.html',
+                    {'project': project, 'reports': reports , 'tags':tags, 'average_rating': average_rating,'noOfRating': project.total_rating_count,})
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
 
 
 def error_page(request):
@@ -452,23 +476,28 @@ def search(request):
 
 @login_required
 def donate(request, pk):
-    project = Project.objects.get(pk=pk)
-    if request.method == 'POST':
-        form = DonationForm(request.POST, initial={'project': project})
-        if form.is_valid():
-            try:
-                form.save(project)
-                success_message = f'Thank you for your donation of ${form.cleaned_data["donation_amount"]}.'
-                return JsonResponse({'success': True, 'success_message': success_message})
-            except forms.ValidationError as e:
-                errors = {'detail': str(e)}
+    try:
+        project = Project.objects.get(pk=pk)
+        if request.method == 'POST':
+            form = DonationForm(request.POST, initial={'project': project})
+            if form.is_valid():
+                try:
+                    form.save(project)
+                    success_message = f'Thank you for your donation of ${form.cleaned_data["donation_amount"]}.'
+                    return JsonResponse({'success': True, 'success_message': success_message})
+                except forms.ValidationError as e:
+                    errors = {'detail': str(e)}
+                    return JsonResponse({'success': False, 'errors': errors})
+            else:
+                errors = form.errors
                 return JsonResponse({'success': False, 'errors': errors})
         else:
-            errors = form.errors
-            return JsonResponse({'success': False, 'errors': errors})
-    else:
-        form = DonationForm(initial={'project': project})
-    return render(request, 'Project/project_list.html', {'form': form, 'project': project})
+            form = DonationForm(initial={'project': project})
+        return render(request, 'Project/project_list.html', {'form': form, 'project': project})
+    except Project.DoesNotExist:
+        return JsonResponse({'success': False, 'errors': {'detail': 'Project does not exist'}})
+    except Exception as e:
+        return JsonResponse({'success': False, 'errors': {'detail': str(e)}})
 
 
 ######rating as an integer input###########

@@ -159,31 +159,38 @@ def check_verification_token(user_id, token):
 
 
 def admin_login(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('admin_home')
-    else:
-        form = AuthenticationForm()
+    try:
+        if request.method == 'POST':
+            form = AuthenticationForm(request, request.POST)
+            if form.is_valid():
+                username = form.cleaned_data.get('username')
+                password = form.cleaned_data.get('password')
+                user = authenticate(request, username=username, password=password)
+                if user is not None:
+                    login(request, user)
+                    return redirect('admin_home')
+        else:
+            form = AuthenticationForm()
+    except Exception as e:
+            return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
     return render(request, 'admin/admin_login.html', {'form': form})
 
 
 @login_required
 def admin_home(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        active_projects_count = Project.objects.filter(is_active=1).count()
-        non_active_projects_count = Project.objects.filter(is_active=0).count()
-        reported_projects = Project.objects.filter(is_reported=True).annotate(report_count=Count('reports'))
-        return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count,
-                                                         'non_active_projects_count': non_active_projects_count,
-                                                         'reported_projects': reported_projects})
-    else:
-        return redirect('administration')
+    try:
+        if request.user.is_authenticated and request.user.is_superuser:
+            active_projects_count = Project.objects.filter(is_active=1).count()
+            non_active_projects_count = Project.objects.filter(is_active=0).count()
+            reported_projects = Project.objects.filter(is_reported=True).annotate(report_count=Count('reports'))
+            return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count,
+                                                            'non_active_projects_count': non_active_projects_count,
+                                                            'reported_projects': reported_projects})
+        else:
+            return redirect('administration')
+    except Exception as e:
+            return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
+
 
 
 @login_required
