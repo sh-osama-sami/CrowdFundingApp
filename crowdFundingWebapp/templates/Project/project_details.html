@@ -14,153 +14,154 @@
     <!-- Include Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+    /* Add background image and opacity to the entire page */
+    body {
+        background-image: url("{% static 'images/background.jpg' %}"); /* Set the background image path */
+        background-size: cover; /* Cover the entire background with the image */
+        background-repeat: no-repeat; /* Prevent background image from repeating */
+        background-position: center center; /* Center the background image */
+        opacity: 0.9; /* Set the opacity for the background image */
+    }
+    /* Additional style for the container background */
+            .container {
+                background-color: white;
+                padding: 20px; /* Add padding for better appearance */
+                border-radius: 8px; /* Optional: Add border radius for rounded corners */
+            }
+            /* Custom styles for the title */
+    .page-title {
+        background-color: white;
+        padding: 10px 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center; /* Center the title */
+        font-family: 'Times New Roman', sans-serif; /* Change font family */
+        font-size: 48px; /* Change font size */
+        font-weight: bold;
+        color: #333; /* Change font color */
+        letter-spacing: 2px; /* Add letter spacing for a stylish look */
+        text-transform: uppercase; /* Transform text to uppercase */
+    }
 
-        /* Add background image and opacity to the entire page */
-        body {
-            background-image: url("{% static 'images/background.jpg' %}"); /* Set the background image path */
-            background-size: cover; /* Cover the entire background with the image */
-            background-repeat: no-repeat; /* Prevent background image from repeating */
-            background-position: center center; /* Center the background image */
-            opacity: 0.9; /* Set the opacity for the background image */
-        }
+    /* Custom CSS for adjusting image sizes */
+    .carousel-inner .carousel-item {
+        height: 500px; /* Set a fixed height for the carousel container */
+    }
 
-        body .container {
-            max-width: 80%; /* Set maximum width for the container (adjust as needed) */
-        }
+    .carousel-inner .carousel-item img {
+        height: 100%; /* Set the image height to 100% to fit within the container */
+        width: auto; /* Set width to auto to maintain aspect ratio */
+        object-fit: contain; /* Resize the image to fit the container without cropping */
+        margin-left: auto; /* Center the container horizontally */
+        margin-right: auto;
+    }
 
-        /* Container styles */
-        .container {
-            font-size: 22px;
-            background-color: rgba(255, 255, 255, 0.9); /* Set the background color for the content container with opacity */
-            border-radius: 15px; /* Optional: Add border radius for rounded corners */
-            padding: 20px; /* Increase padding for content spacing */
-            margin-top: 20px; /* Increase margin to the top */
-            max-width: 3000px; /* Set maximum width for the container */
-            margin-left: auto; /* Center the container horizontally */
-            margin-right: auto; /* Center the container horizontally */
-        }
-    
+    /* Custom CSS for carousel control arrows */
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        color: #0b3c42; /* Change the color of the carousel control icons */
+    }
 
-        /* Custom CSS for adjusting image sizes */
-        .carousel-inner .carousel-item {
-            height: 500px; /* Set a fixed height for the carousel container */
-        }
+    /* Custom CSS for smaller main project image */
+    .main-project-image {
+        max-width: 300px; /* Set the maximum width */
+        height: auto; /* Maintain aspect ratio */
+    }
 
-        .carousel-inner .carousel-item img {
-            height: 100%; /* Set the image height to 100% to fit within the container */
-            width: auto; /* Set width to auto to maintain aspect ratio */
-            object-fit: contain; /* Resize the image to fit the container without cropping */
-            margin-left: auto; /* Center the container horizontally */
-            margin-right: auto;
-        }
+    /* CSS for comment reporting button */
+    .report-comment-btn {
+        float: right;
+    }
 
-        /* Custom CSS for carousel control arrows */
-        .carousel-control-prev-icon,
-        .carousel-control-next-icon {
-            color: #0b3c42; /* Change the color of the carousel control icons */
-        }
+    /* Style for star icons */
+    .star {
+        cursor: pointer;
+        font-size: 40px;
+    }
 
-        /* Custom CSS for smaller main project image */
-        .main-project-image {
-            max-width: 300px; /* Set the maximum width */
-            height: auto; /* Maintain aspect ratio */
-        }
+    /* Style for filled star */
+    .star.active {
+        color: gold;
+    }
 
-        /* CSS for comment reporting button */
-        .report-comment-btn {
-            float: right;
-        }
+    /* CSS to display stars and rate button inline */
+    #rating-section {
+        display: flex; /* Use flexbox to align items */
+        align-items: center; /* Align items vertically */
+    }
 
-        /* Style for star icons */
-        .star {
-            cursor: pointer;
-            font-size: 40px;
-        }
+    #rating-stars {
+        margin-right: 10px; /* Add some space between stars and the button */
+    }
 
-        /* Style for filled star */
-        .star.active {
-            color: gold;
-        }
+    /* Style for rate button */
+    #rating-button {
+        background-color: gold; /* Set the background color to gold */
+        color: black; /* Set text color */
+        border: none; /* Remove border */
+        padding: 10px 20px; /* Add padding */
+        cursor: pointer; /* Change cursor on hover */
+        border-radius: 15px;
+    }
 
-        /* CSS to display stars and rate button inline */
-        #rating-section {
-            display: flex; /* Use flexbox to align items */
-            align-items: center; /* Align items vertically */
-        }
+    /* Custom CSS for comments section */
+    .comments-section {
+        margin-left: 0; /* Ensure the comments start from the left */
+    }
 
-        #rating-stars {
-            margin-right: 10px; /* Add some space between stars and the button */
-        }
+    /* Style for comment cards */
+    .comment-card {
+        width: 100%; /* Make the comment cards take up the full width */
+        margin-bottom: 20px; /* Add some space between comment cards */
+    }
 
-        /* Style for rate button */
-        #rating-button {
-            background-color: gold; /* Set the background color to gold */
-            color: black; /* Set text color */
-            border: none; /* Remove border */
-            padding: 10px 20px; /* Add padding */
-            cursor: pointer; /* Change cursor on hover */
-            border-radius: 15px;
-        }
+    /* Style for comment text */
+    .comment-text {
+        font-size: 30px; /* Increase the font size of comment text */
+    }
 
-        /* Custom CSS for comments section */
-        .comments-section {
-            margin-left: 0; /* Ensure the comments start from the left */
-        }
-
-        /* Style for comment cards */
-        .comment-card {
-            width: 100%; /* Make the comment cards take up the full width */
-            margin-bottom: 20px; /* Add some space between comment cards */
-        }
-
-        /* Style for comment text */
-        .comment-text {
-            font-size: 30px; /* Increase the font size of comment text */
-        }
-
-        /* Style for report comment button */
-        .report-comment-btn {
-            font-size: 18px; /* Increase the font size of the report comment button */
-            margin-left: auto; /* Align the button to the right */
-        }
-        .add-comment-form {
-            width: 80%; /* Adjust the width as needed */
-            margin-left: 0; /* Center the form horizontally */
-            padding: 20px; /* Add padding for spacing */
-            border-radius: 8px; /* Optional: Add border radius for rounded corners */
-        }
-    
-    
-        .comment-input {
-            width: 100%; /* Make the text input full-width within the form */
-        }
+    /* Style for report comment button */
+    .report-comment-btn {
+        font-size: 18px; /* Increase the font size of the report comment button */
+        margin-left: auto; /* Align the button to the right */
+    }
+    .add-comment-form {
+        width: 80%; /* Adjust the width as needed */
+        margin-left: 0; /* Center the form horizontally */
+        padding: 20px; /* Add padding for spacing */
+        border-radius: 8px; /* Optional: Add border radius for rounded corners */
+    }
 
 
-        /* Style for alert messages */
-        .alert {
-            font-size: 20px; /* Increase the font size of alert messages */
-        }
+    .comment-input {
+        width: 100%; /* Make the text input full-width within the form */
+    }
 
-        /* Custom CSS for similar projects section */
-        .similar-projects-section {
-            margin-left: 0; /* Ensure similar projects start from the left */
-        }
 
-        /* Style for similar project cards */
-        .similar-project-card {
-            width: 100%; /* Make the similar project cards take up the full width */
-            margin-bottom: 20px; /* Add some space between similar project cards */
-        }
-        
+    /* Style for alert messages */
+    .alert {
+        font-size: 20px; /* Increase the font size of alert messages */
+    }
 
-    </style>
+    /* Custom CSS for similar projects section */
+    .similar-projects-section {
+        margin-left: 0; /* Ensure similar projects start from the left */
+    }
+
+    /* Style for similar project cards */
+    .similar-project-card {
+        width: 100%; /* Make the similar project cards take up the full width */
+        margin-bottom: 20px; /* Add some space between similar project cards */
+    }
+</style>
+
 
 </head>
-
 <body>
-    <div class="container">
-        <h1 style="text-align: center;">{{ project.title }}</h1>
-        
+        <h1 class="page-title"style="text-align: center;">{{ project.title }}</h1>
+        <div class="container">
+
         <!-- Display average rating -->
         {% if average_rating %}
         <div style="display: flex; align-items: center;">
@@ -549,13 +550,32 @@
         document.getElementById('messageContainer').innerHTML = '';
     });
  </script>
+</div> <!-- Close the container div here -->
 
 </body>
 </html>
+
+<script>
+    // Add a scroll event listener to make the navbar fixed and move with scrolling
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar'); // Adjust this selector based on your navbar class
+        if (navbar) {
+            if (window.scrollY > 0) {
+                navbar.classList.add('fixed-top');
+            } else {
+                navbar.classList.remove('fixed-top');
+            }
+        }
+    });
+</script>
+
+<!-- Include Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Include Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <!-- Include Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 {% endblock %}
