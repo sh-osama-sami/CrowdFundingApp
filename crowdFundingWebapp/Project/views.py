@@ -248,7 +248,11 @@ def project_details(request, pk):
 
 @login_required
 def report_project(request, pk):
-    project = get_object_or_404(Project, id=pk)
+    try:
+        project = Project.objects.get(id=pk)
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'Project not found.'})
+
     user = request.user.customuser  # Fetch the CustomUser instance
 
     # Check if the user has already reported this project
@@ -275,6 +279,7 @@ def report_project(request, pk):
         form = ReportForm()
     
     return render(request, 'Project/project_details.html', {'project': project, 'form': form})
+
 
 
 @login_required
@@ -304,7 +309,12 @@ def report_comment(request, comment_id):
 
 @login_required
 def reply_comment(request, parent_id):
-    parent_comment = get_object_or_404(Comment, pk=parent_id)
+    
+    try:
+        parent_comment = Comment.objects.get(pk=parent_id)
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'Comment not found.'})
+
     project = parent_comment.project  # Get the project related to the parent comment
 
     if request.method == 'POST':
@@ -328,6 +338,8 @@ def reply_comment(request, parent_id):
 
     # Redirect to project details page in case of GET request or form validation errors
     return redirect('project_details', pk=project.pk)
+
+
 
 # ========================================================================================================================
 # CRUD operations
