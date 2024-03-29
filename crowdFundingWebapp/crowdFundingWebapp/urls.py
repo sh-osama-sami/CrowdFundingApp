@@ -18,11 +18,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from authentication.views import profile
+from authentication.views import profile, admin_login
 from Project.views import home
 
 urlpatterns = [
-                #   path('admin/', admin.site.urls),
+                  path('admin/', admin_login),
                   path('authentication/', include('authentication.urls')),
                   path('accounts/profile/', profile),      
                   path('Projects/', include('Project.urls')),
