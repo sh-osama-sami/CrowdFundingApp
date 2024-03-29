@@ -12,82 +12,57 @@
         margin-left: auto; 
         margin-right: auto;
     }
+    .input-group {
+        position: relative;
+    }
+    #searchInput {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        margin-right: 10px;
+    }
+    select {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        background-color:white;
+        border: none;
+        margin-right: 10px;
+        font-size: 18px;
+        text-align: center;
+    }
+    .search-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
     
 </style>
 <div class="container mt-4">
     <div class="row justify-content-between align-items-center">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="input-group">
                 <input type="text" class="form-control form-control-lg" id="searchInput" placeholder="Search Projects">
                 <select id="searchBy">
                     <option value="name">Project Name</option>
                     <option value="tag">Tag</option>
                 </select>
+                <select id="filterBy">
+                    <option value="all">All Projects</option>
+                    <option value="featured">Featured Only</option>
+                    <option value="non-featured">Non-Featured</option>
+                    <option value="reached-target">Reached Target</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="active">Active</option>
+                </select>
             </div>
         </div>
-        <!-- <div class="col-md-6">
-            <div class="row align-items-center">
-                <div class="col-md-3">
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" id="filterByCatDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-
-                            Category
-                        </button>
-                       <div class="dropdown-menu" aria-labelledby="filterByCatDropdown">
-                            <a class="dropdown-item category-option active" data-value="all">All</a>
-                            {% for category in categories %}
-                            <a class="dropdown-item category-option"  data-value="{{ category.id }}">{{ category.name }}</a>
-                            {% endfor %}
-                      </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" id="filterByStatusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Status
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="filterByStatusDropdown">
-                            <a class="dropdown-item status-option active" data-value="all">All</a>
-                            <a class="dropdown-item status-option"  data-value="active">Active</a>
-                            <a class="dropdown-item status-option"  data-value="inactive">Inactive</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" id="filterByFeaturedDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Featured
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="filterByFeaturedDropdown">
-                            <a class="dropdown-item featured-option active" data-value="all">All</a>
-                            <a class="dropdown-item featured-option"  data-value="featured">Featured</a>
-                            <a class="dropdown-item featured-option"  data-value="not-featured">Not Featured</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" id="filterByTagDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Tag
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="filterByTagDropdown">
-                            {% for tag in tags %}
-                            <div class="form-check">
-                                <input class="form-check-input filter-checkbox tag-checkbox" type="checkbox" value="{{ tag.id }}" id="tag{{ tag.id }}">
-                                <label class="form-check-label" for="tag{{ tag.id }}">{{ tag.name }}</label>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
     </div>
     <div class="row mt-4" id="projectList">
         {% for project in projects %}
         <div class="col-md-3 mb-2 project-card" 
              data-category="{{ project.category }}"
-             data-status="{{ project.status }}"
+             data-status="{{ project.get_status }}"
              data-featured="{% if project.is_featured %}featured{% else %}not-featured{% endif %}"
              data-tags="{% for tag in project.tags.all %}{{ tag.name }} {% endfor %}">
             <div class="card">
@@ -150,11 +125,49 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const searchInput = document.getElementById('searchInput');
-    // const categoryDropdown = document.getElementById('filterByCatDropdown');
-    // const statusDropdown = document.getElementById('filterByStatusDropdown');
-    // const featuredDropdown = document.getElementById('filterByFeaturedDropdown');
-    // const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
-    // const projectList = document.getElementById('projectList');
+    const filterBySelect = document.getElementById('filterBy');
+    const projectList = document.getElementById('projectList'); 
+
+    function applyFilters() {
+            const searchText = searchInput.value.toLowerCase();
+            const searchBy = document.getElementById('searchBy').value;
+            const filterBy = filterBySelect.value;
+            const projects = projectList.querySelectorAll('.project-card');
+
+            projects.forEach(function(project) {
+                let searchTarget = '';
+                let display = 'block';  
+
+                if (searchBy === 'name') {
+                    searchTarget = project.querySelector('.card-title').textContent.toLowerCase();
+                } else if (searchBy === 'tag') {
+                    searchTarget = project.querySelector('.card-tags').textContent.toLowerCase();
+                }
+
+                if (!searchTarget.includes(searchText)) {
+                    display = 'none'; 
+                }
+
+                if (filterBy !== 'all') {
+                    const category = project.getAttribute('data-category');
+                    const status = project.getAttribute('data-status');
+                    const featured = project.getAttribute('data-featured');
+
+                    if ((filterBy === 'featured' && featured !== 'featured') ||
+                        (filterBy === 'non-featured' && featured !== 'not-featured') ||
+                        (filterBy === 'reached-target' && project.querySelector('.progress-bar').style.width !== '100%') ||
+                        (filterBy === 'suspended' && status !== 'Suspended') ||
+                        (filterBy === 'active' && status !== 'Active')) {
+                        display = 'none'; 
+                    }
+                }
+                project.style.display = display;
+            });
+        }
+
+        searchInput.addEventListener('input', applyFilters); 
+        filterBySelect.addEventListener('change', applyFilters);
+
     document.querySelectorAll('.favorite-btn').forEach(function(button) {
             button.addEventListener('click', function() {
                 const url = this.getAttribute('data-update-url');
@@ -187,122 +200,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
             });
         });
-    searchInput.addEventListener('input', function() {
-            const searchText = searchInput.value.toLowerCase();
-            const searchBy = document.getElementById('searchBy').value;
-            const projects = projectList.querySelectorAll('.project-card');
-    
-            projects.forEach(function(project) {
-                let searchTarget = '';    
-                if (searchBy === 'name') {
-                    searchTarget = project.querySelector('.card-title').textContent.toLowerCase();
-                } else if (searchBy === 'tag'){
-                    searchTarget = project.querySelector('.card-tags').textContent.toLowerCase();
-                }
-                if (searchTarget.includes(searchText)) {
-                    project.style.display = 'block';
-                } else {
-                    project.style.display = 'none';
-                }
-            });
-        });
-
     });
 </script>
-<!-- <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const searchInput = document.getElementById('searchInput');
-        const categoryDropdown = document.getElementById('filterByCatDropdown');
-        const statusDropdown = document.getElementById('filterByStatusDropdown');
-        const featuredDropdown = document.getElementById('filterByFeaturedDropdown');
-        const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
-        const projectList = document.getElementById('projectList');
-    
-        // Function to handle toggling selection and filtering projects
-        function handleSelectionAndFiltering(element, filterType) {
-            element.addEventListener('click', function() {
-                // Toggle selected class
-                this.classList.toggle('selected');
-    
-                // Remove 'selected' class from all siblings
-                const siblings = Array.from(this.parentElement.children);
-                siblings.forEach(sibling => {
-                    if (sibling !== this) {
-                        sibling.classList.remove('selected');
-                    }
-                });
-    
-                // Get selected values
-                const selectedValues = Array.from(element.parentElement.querySelectorAll('.selected')).map(item => item.dataset.value);
-    
-                // Filter projects
-                const projects = projectList.querySelectorAll('.project-card');
-    
-                projects.forEach(project => {
-                    const value = project.dataset[filterType];
-    
-                    if (selectedValues.length === 0 || selectedValues.includes(value)) {
-                        project.style.display = 'block';
-                    } else {
-                        project.style.display = 'none';
-                    }
-                });
-            });
-        }
-    
-        // Handle category selection and filtering
-        handleSelectionAndFiltering(categoryDropdown, 'category');
-    
-        // Handle status selection and filtering
-        handleSelectionAndFiltering(statusDropdown, 'status');
-    
-        // Handle featured selection and filtering
-        handleSelectionAndFiltering(featuredDropdown, 'featured');
-    
-        // Function to handle tag checkbox selection and filtering
-        function handleTagSelectionAndFiltering() {
-            const checkedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(checkbox => checkbox.value);
-            
-            const projects = projectList.querySelectorAll('.project-card');
-            
-            projects.forEach(project => {
-                const projectTags = project.dataset.tags.split(' ');
-                
-                if (checkedTags.length === 0 || checkedTags.some(tag => projectTags.includes(tag))) {
-                    project.style.display = 'block';
-                } else {
-                    project.style.display = 'none';
-                }
-            });
-        }
-    
-        // Add event listener to tag checkboxes
-        tagCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', handleTagSelectionAndFiltering);
-        });
-    
-        // Handle search input filtering
-        searchInput.addEventListener('input', function() {
-            const searchText = searchInput.value.toLowerCase();
-            const projects = projectList.querySelectorAll('.project-card');
-    
-            projects.forEach(project => {
-                const projectName = project.querySelector('.card-title').textContent.toLowerCase();
-    
-                if (projectName.includes(searchText)) {
-                    project.style.display = 'block';
-                } else {
-                    project.style.display = 'none';
-                }
-            });
-        });
-    
-    });
-    </script> -->
-    
-             
-                
-  
-    
+
 {% endblock %}
 
