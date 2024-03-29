@@ -184,11 +184,23 @@ def admin_login(request):
 def admin_home(request):
     try:
         if request.user.is_authenticated and request.user.is_superuser:
-            active_projects_count = Project.objects.filter(is_active=1).count()
-            non_active_projects_count = Project.objects.filter(is_active=0).count()
+            all_projects = Project.objects.all()
+            active_projects_count = 0
+            suspended_projects_count = 0
+            completed_projects_count = 0
+            for project in all_projects:
+                status = project.get_status()
+                if status == "Active":
+                    active_projects_count += 1
+                elif status == "Suspended":
+                    suspended_projects_count += 1
+                elif status == "Reached Target":
+                    completed_projects_count += 1
+                    
             reported_projects = Project.objects.filter(is_reported=True).annotate(report_count=Count('reports'))
             return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count,
-                                                            'non_active_projects_count': non_active_projects_count,
+                                                            'suspended_projects_count': suspended_projects_count,
+                                                            'completed_projects_count': completed_projects_count,
                                                             'reported_projects': reported_projects})
         else:
             return redirect('administration')

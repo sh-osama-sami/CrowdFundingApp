@@ -29,21 +29,24 @@
 <script>
     var ctx = document.getElementById('projectChart').getContext('2d');
     var active_projects_count = "{{ active_projects_count }}";
-    var non_active_projects_count = "{{ non_active_projects_count }}";
+    var suspended_projects_count = "{{ suspended_projects_count }}";
+    var completed_projects_count = "{{ completed_projects_count }}";
     var myChart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ['Active Projects', 'Non-active Projects'],
+            labels: ['Active Projects', 'Suspended Projects' , 'Reached Target Projects'],
             datasets: [{
                 label: 'Count',
-                data: [active_projects_count, non_active_projects_count],
+                data: [active_projects_count, suspended_projects_count, completed_projects_count],
                 backgroundColor: [
-                    'rgba(0, 128, 0, 0.5)',
-                    'rgba(255, 0, 0, 0.5)'
+                'rgba(0, 0, 255, 0.5)',   
+                'rgba(255, 0, 0, 0.5)',  
+                'rgba(0, 128, 0, 0.5)'
                 ],
                 borderColor: [
-                    'rgba(0, 128, 0)',
-                    'rgba(255, 0,0, 1)'
+                'rgba(0, 0, 255, 1)',    
+                'rgba(255, 0, 0, 1)', 
+                'rgba(0, 128, 0)'
                 ],
                 borderWidth: 1
             }]
