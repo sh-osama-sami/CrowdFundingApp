@@ -57,6 +57,17 @@
         margin: 20px auto 0; /* Added margin-top of 20px */
         text-align: center;
     }
+
+        /* Custom CSS for project card titles */
+        .project-card-title {
+            text-align: left; /* Center the project title */
+            font-size: 30px; /* Increase font size to 30px */
+            font-weight: bold;
+            color: #333; /* Change font color */
+            text-decoration-thickness: 2px; /* Thickness of the underline */
+            margin-bottom: 10px; /* Add space between title and underline */
+        }
+    
 </style>
 
 <div class="container content-with-navbar">
@@ -68,7 +79,7 @@
         <div class="col-md-6">
             <div class="card mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">{{ project.title }}</h5>
+                    <h5 class="card-title project-card-title">{{ project.title }}</h5> <!-- Added project-card-title class -->
                     <div id="carouselExample{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
                             {% for image in project.images.all %}
