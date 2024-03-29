@@ -15,12 +15,12 @@
             <div id="categoryList" class="row row-cols-1 row-cols-md-3 g-4"> 
                 {% for category in categories %}
                 <div class="col">
-                    <div class="card category-card mb-4">
+                    <a href="{% url 'categoryDetails' category.id %}" class="card category-card mb-4">
                         <div class="card-body">
                             <h5 class="card-title">{{ category.name }}</h5>
-                            <p class="card-text d-none">{{ category.description }}</p>
+                            <p class="card-text">{{ category.description }}</p>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 {% endfor %}
             </div>
@@ -57,6 +57,8 @@
         border-radius: 8px;
         transition: all 0.3s ease-in-out;
         cursor: pointer;
+        text-decoration: none; 
+        color: inherit; 
     }
     .category-card:hover .card-text {
         display: block !important;
@@ -94,7 +96,7 @@
     
         toggleButton.addEventListener('click', function(event) {
             toggleFormVisibility();
-            event.stopPropagation(); // Prevent the click event from bubbling up
+            event.stopPropagation();
         });
     
         const toggleFormVisibility = function() {
@@ -137,5 +139,5 @@
             toggleFormVisibility();
         }
     });
-    </script> 
-{% endblock %} 
+</script> 
+{% endblock %}

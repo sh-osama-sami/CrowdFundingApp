@@ -39,7 +39,37 @@ def create_category(request):
 
     return render(request, 'admin/create_category.html', {'categories': categories, 'form': form})
 
-
+@login_required
+def categoryDetails(request, category_id):
+    try:
+        if request.user.is_authenticated and request.user.is_superuser:
+            category = get_object_or_404(Category, pk=category_id)
+            projects = category.project_set.all()
+            featured_projects_count = projects.filter(is_featured=True).count()
+            active_projects_count = 0
+            suspended_projects_count = 0
+            completed_projects_count = 0
+            for project in projects:
+                status = project.get_status()
+                if status == "Active":
+                    active_projects_count += 1
+                elif status == "Suspended":
+                    suspended_projects_count += 1
+                elif status == "Reached Target":
+                    completed_projects_count += 1
+            average_rating = projects.aggregate(avg_rating=Avg('rating__rating'))['avg_rating'] or 0
+            return render(request, 'admin/category_details.html', {
+                'category': category,
+                'projects': projects,
+                'featured_projects_count': featured_projects_count,
+                'active_projects_count': active_projects_count,
+                'suspended_projects_count': suspended_projects_count,
+                'reached_target_projects_count': completed_projects_count,
+                'average_rating': average_rating
+            })
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
+    
 @login_required
 def select_featured_projects(request):
     try:

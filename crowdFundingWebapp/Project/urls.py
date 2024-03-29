@@ -31,5 +31,7 @@ urlpatterns = [
     path('admin_project_details/<int:project_id>', admin_project_details, name="admin_project_details"),
     path('error/', error_page, name='error_page'),
     path('reply_comment/<int:parent_id>/', reply_comment, name='reply_comment'),
+    path('categoryDetails/<int:category_id>/', categoryDetails, name='categoryDetails'),
+
 
 ]
