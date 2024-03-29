@@ -49,6 +49,14 @@
         letter-spacing: 2px; /* Add letter spacing for a stylish look */
         text-transform: uppercase; /* Transform text to uppercase */
     }
+
+    /* Custom CSS for centering and resizing the button */
+    .centered-button {
+        display: block;
+        width: 50%;
+        margin: 20px auto 0; /* Added margin-top of 20px */
+        text-align: center;
+    }
 </style>
 
 <div class="container content-with-navbar">
@@ -93,7 +101,7 @@
                         </div>
                     </div>
                     {% endif %}
-                    <a href="{% url 'project_details' project.id %}" class="btn btn-primary">View Details</a>
+                    <a href="{% url 'project_details' project.id %}" class="btn btn-primary centered-button">View Details</a>
                 </div>
             </div>
         </div>
