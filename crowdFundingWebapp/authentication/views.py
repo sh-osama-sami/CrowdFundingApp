@@ -87,11 +87,15 @@ def signin(request):
             password = request.POST.get('password')
             user = authenticate(request, username=username, password=password)
             if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return redirect('home')
+                if user.is_superuser==0:
+
+                    if user.is_active:
+                        login(request, user)
+                        return redirect('home')
+                    else:
+                        messages.error(request, 'Your account is not activated. Please verify your email.')
                 else:
-                    messages.error(request, 'Your account is not activated. Please verify your email.')
+                    messages.error(request, 'admin cannot login here')
             else:
                 print(user)
                 messages.info(request, 'Invalid username or password.')
