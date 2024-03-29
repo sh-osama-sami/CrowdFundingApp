@@ -41,13 +41,17 @@
     color: #555;
   }
 
+  /* Common styles for input fields */
   .register-form input[type="text"],
   .register-form input[type="email"],
-  .register-form input[type="password"] {
+  .register-form input[type="password"],
+  .register-form button[type="submit"] {
     padding: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    width: calc(100% - 22px); /* Calculate width to accommodate padding and border */
+    box-sizing: border-box; /* Include padding and border in the width calculation */
   }
 
   .register-btn {
@@ -75,6 +79,7 @@
     color: #721c24;
     border-radius: 5px;
   }
+
 </style>
 
 <div class="register-container">
