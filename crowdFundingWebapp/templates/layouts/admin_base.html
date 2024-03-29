@@ -33,7 +33,7 @@
                 <a class="navbar-brand" href="{% url 'admin_home' %}">CrowdFunding</a>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <form method="post" action="{% url 'logout' %}">
+                        <form method="post" action="{% url 'admin_logout' %}">
                             {% csrf_token %}
                             <input type="submit" value="Logout" class="nav-link">
                         </form>

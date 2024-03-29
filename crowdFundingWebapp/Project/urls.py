@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import *
-from authentication.views import admin_home
+from authentication.views import admin_home,admin_login
 
 urlpatterns = [
     path('create_category/', create_category, name='create_category'),
@@ -32,6 +32,6 @@ urlpatterns = [
     path('error/', error_page, name='error_page'),
     path('reply_comment/<int:parent_id>/', reply_comment, name='reply_comment'),
     path('categoryDetails/<int:category_id>/', categoryDetails, name='categoryDetails'),
-
+    path('admin_logout/',admin_logout, name="admin_logout")
 
 ]

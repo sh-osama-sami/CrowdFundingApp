@@ -12,8 +12,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count, Avg, Q
 from django.contrib import messages
-from django.contrib.auth import get_user_model
-from authentication.views import admin_home
+from django.contrib.auth import get_user_model,logout
+from authentication.views import admin_login
 
 
 # Create your views here.
@@ -21,19 +21,20 @@ from authentication.views import admin_home
 @login_required
 def create_category(request):
     try:
-        categories = Category.objects.all()
-        form = CategoryForm()
-        if request.method == 'POST':
-            form = CategoryForm(request.POST)
-            if form.is_valid():
-                category_name = form.cleaned_data['name']
-                if Category.objects.filter(name=category_name).exists():
-                    form.add_error('name', 'Category with this name already exists.')
-                else:
-                    form.save()
-                    return redirect('create_category')
-        else:
+        if request.user.is_authenticated and request.user.is_superuser:
+            categories = Category.objects.all()
             form = CategoryForm()
+            if request.method == 'POST':
+                form = CategoryForm(request.POST)
+                if form.is_valid():
+                    category_name = form.cleaned_data['name']
+                    if Category.objects.filter(name=category_name).exists():
+                        form.add_error('name', 'Category with this name already exists.')
+                    else:
+                        form.save()
+                        return redirect('create_category')
+            else:
+                form = CategoryForm()
     except Exception as e:
         return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
 
@@ -73,13 +74,14 @@ def categoryDetails(request, category_id):
 @login_required
 def select_featured_projects(request):
     try:
-        projects = Project.objects.all()
-        for project in projects:
-            if project.total_target > 0:
-                project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
-            else:
-                project.progress_percentage = 0
-        return render(request, 'admin/featured_project.html', {'projects': projects })
+        if request.user.is_authenticated and request.user.is_superuser:
+            projects = Project.objects.all()
+            for project in projects:
+                if project.total_target > 0:
+                    project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
+                else:
+                    project.progress_percentage = 0
+            return render(request, 'admin/featured_project.html', {'projects': projects })
     except Exception as e:
         return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
 
@@ -107,65 +109,84 @@ def update_featured_status(request, project_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
+@login_required
 def report_details_admin(request,project_id):
     try:
-        project = get_object_or_404(Project, id=project_id)
-        reports = project.reports.all()
-        tags = project.tags.all()
-        return render(request, 'admin/admin_report_details.html', {'project': project, 'reports': reports , 'tags':tags})
+        if request.user.is_authenticated and request.user.is_superuser:
+
+            project = get_object_or_404(Project, id=project_id)
+            reports = project.reports.all()
+            tags = project.tags.all()
+            return render(request, 'admin/admin_report_details.html', {'project': project, 'reports': reports , 'tags':tags})
     except Exception as e:
         return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
 
+@login_required
 def admin_suspend_project(request, project_id):
     try:
-        project = get_object_or_404(Project, id=project_id)
-        if request.method == 'POST':
-            project.is_active = False
-            project.save()
-            return redirect('admin_home')
-        return render(request, 'admin/suspend_project_confirmation.html', {'project': project})
+        if request.user.is_authenticated and request.user.is_superuser:
+            project = get_object_or_404(Project, id=project_id)
+            if request.method == 'POST':
+                project.is_active = False
+                project.save()
+                return redirect('admin_home')
+            return render(request, 'admin/suspend_project_confirmation.html', {'project': project})
     except Exception as e:
         return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
 
-
+@login_required
 def admin_delete_project(request, project_id):
     try:
-        project = get_object_or_404(Project, id=project_id)
-        if request.method == 'POST':
-            project.delete()
-            return redirect('admin_home')
-        return render(request, 'admin/delete_project_confirmation.html', {'project': project})
+        if request.user.is_authenticated and request.user.is_superuser:
+            project = get_object_or_404(Project, id=project_id)
+            if request.method == 'POST':
+                project.delete()
+                return redirect('admin_home')
+            return render(request, 'admin/delete_project_confirmation.html', {'project': project})
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
+
+@login_required
+def admin_ignore_reports(request, project_id):
+    try:
+        if request.user.is_authenticated and request.user.is_superuser:
+            project = get_object_or_404(Project, id=project_id)
+            report = get_object_or_404(Report, project_id=project_id)
+
+            if request.method == 'POST':
+                if project.current_amount < project.total_target:
+                    project.is_active = True
+                project.is_reported = False
+                report.delete()
+                project.save()
+                return redirect('admin_home')
+            return render(request, 'admin/ignore_reports_confirmation.html', {'project': project})
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
+
+@login_required
+def admin_project_details(request,project_id):
+    try:
+        if request.user.is_authenticated and request.user.is_superuser:
+            project = get_object_or_404(Project, id=project_id)
+            reports = project.reports.all()
+            tags = project.tags.all()
+            ratings = Rating.objects.filter(project=project)
+            average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+            return render(request, 'admin/admin_project_details.html',
+                        {'project': project, 'reports': reports , 'tags':tags, 'average_rating': average_rating,'noOfRating': project.total_rating_count,})
+    except Exception as e:
+        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
+
+@login_required
+def admin_logout(request):
+    try:
+        if request.user.is_authenticated and request.user.is_superuser:
+            logout(request)
+            return redirect(admin_login)
     except Exception as e:
         return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
     
-def admin_ignore_reports(request, project_id):
-    try:
-        project = get_object_or_404(Project, id=project_id)
-        report = get_object_or_404(Report, project_id=project_id)
-
-        if request.method == 'POST':
-            if project.current_amount < project.total_target:
-                project.is_active = True
-            project.is_reported = False
-            report.delete()
-            project.save()
-            return redirect('admin_home')
-        return render(request, 'admin/ignore_reports_confirmation.html', {'project': project})
-    except Exception as e:
-        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
-
-def admin_project_details(request,project_id):
-    try:
-        project = get_object_or_404(Project, id=project_id)
-        reports = project.reports.all()
-        tags = project.tags.all()
-        ratings = Rating.objects.filter(project=project)
-        average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
-        return render(request, 'admin/admin_project_details.html',
-                    {'project': project, 'reports': reports , 'tags':tags, 'average_rating': average_rating,'noOfRating': project.total_rating_count,})
-    except Exception as e:
-        return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
-
 
 def error_page(request):
     error_message = 'An error occurred.'
