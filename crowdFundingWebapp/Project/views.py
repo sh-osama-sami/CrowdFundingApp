@@ -543,31 +543,35 @@ def donate(request, pk):
 ######rating as stars input###########
 @login_required
 def rate_project(request, project_id):
-    if request.method == 'POST':
-        print("hello")
-        # Retrieve the rating value from the form
-        rating_value = int(request.POST.get('rating', 0))
+    try:
+        if request.method == 'POST':
+            print("hello")
+            # Retrieve the rating value from the form
+            rating_value = int(request.POST.get('rating', 0))
 
-        # Validate rating value (optional)
+            # Validate rating value (optional)
 
-        # Update the rating value in the database for the project
-        project = get_object_or_404(Project, id=project_id)
-        # project.rating = rating_value
-        # project.save()
-        # Create or update the rating
-        user = CustomUser.objects.get(pk=request.user.pk)
-         # Check if the user has previously rated the project
-        rating, created = Rating.objects.get_or_create(user=user, project=project)
-        rating.rating = rating_value
-        rating.save()
+            # Update the rating value in the database for the project
+            project = get_object_or_404(Project, id=project_id)
+            # project.rating = rating_value
+            # project.save()
+            # Create or update the rating
+            user = CustomUser.objects.get(pk=request.user.pk)
+            # Check if the user has previously rated the project
+            rating, created = Rating.objects.get_or_create(user=user, project=project)
+            rating.rating = rating_value
+            rating.save()
 
-            # Update the project's total rating count and value
-        project.update_rating()
+                # Update the project's total rating count and value
+            project.update_rating()
 
-        # Redirect back to the project detail page
-        return redirect('project_details', pk=project_id)
+            # Redirect back to the project detail page
+            return redirect('project_details', pk=project_id)
 
-    # Handle GET requests if needed
+        # Handle GET requests if needed
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html', {'error_message': 'Error in Rating process.'})
+
 
 
 def search_helper(request):
