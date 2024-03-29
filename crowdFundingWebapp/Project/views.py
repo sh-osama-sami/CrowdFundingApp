@@ -505,7 +505,15 @@ def home(request):
     try:
         projects = Project.objects.all().filter(is_active=True).order_by('-created_at')[:5]
         featured_projects = Project.objects.filter(is_featured=True , is_active=True)
-        highest_rated_projects = Project.objects.filter(is_active=True).annotate(avg_rating=Avg('rating__rating')).order_by('-avg_rating')[:5]
+        rated_projects = []
+        for project in Project.objects.all():
+            average_rating = project.calculate_average_rating()
+            rated_projects.append((project, average_rating))
+
+        highest_rated_projects = sorted(rated_projects, key=lambda x: x[1], reverse=True)[:5]
+        # highest_rated_projects = [project for project, _ in highest_rated_projects]
+
+        print(highest_rated_projects)
     except ObjectDoesNotExist:
         return render(request, 'Project/error_page.html', {'error_message': 'Error retrieving projects.'})
     return render(request, 'Home/home.html', {'projects': projects, 'featured_projects': featured_projects
