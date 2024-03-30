@@ -1,24 +1,109 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Create Project{% endblock %}
+
+{% block title %}
+  Create Project
+{% endblock %}
+
+{% load static %}
 
 {% block 'content' %}
-  <h2>Create Project</h2>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div>
-      {{ project_form }}
-    </div>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-image: url("{% static 'images/background.jpg' %}");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center center;
+    }
+
+    .form-container {
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 30px;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-title {
+      font-size: 32px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+
+    .create-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .create-form label {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .create-form input[type="text"],
+    .create-form input[type="email"],
+    .create-form input[type="password"],
+    .create-form button[type="submit"] {
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    .create-btn {
+      padding: 12px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 18px;
+    }
+
+    .create-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .create-messages {
+      margin-top: 20px;
+    }
+
+    .create-messages div {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #f8d7da;
+      color: #721c24;
+      border-radius: 5px;
+    }
+
+  </style>
+  <div class="form-container">
+    <h1 class="page-title">Create a New Project</h1>
+    <form class="create-form" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div>
+        {{ project_form }}
+      </div>
+      <br>
+      <div>
+        {{ image_form }}
+      </div>
+      <br>
+      <div>
         <br>
-    <div>
-      <label>Images:</label>
-      {{ image_form }}
-    </div>
-        <br>
-    <div>
-      <label>Tags:</label>
-      {{ tag_form }}
-    </div>
-    <br>
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
+        {{ tag_form }}
+      </div>
+      <br>
+      <button type="submit" class="create-btn">Submit</button>
+    </form>
+  </div>
 {% endblock %}

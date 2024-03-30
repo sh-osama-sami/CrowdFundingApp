@@ -372,7 +372,6 @@ def reply_comment(request, parent_id):
 # ========================================================================================================================
 
 
-
 @login_required
 def create_project(request):
     if request.method == 'POST':
@@ -397,7 +396,6 @@ def create_project(request):
                 if 'name' in tag_form.cleaned_data:
                     tag_names = tag_form.cleaned_data['name']
                     for tag_name in tag_names:
-
                         tag, _ = Tag.objects.get_or_create(name=tag_name)
                         project.tags.add(tag)
 
@@ -417,6 +415,7 @@ def create_project(request):
         'tag_form': tag_form,
     })
 
+
 @login_required
 def project_detail(request, project_id):
     try:
@@ -431,8 +430,13 @@ def project_detail(request, project_id):
     else:
         progress_percentage = 0  # To avoid division by zero
 
-    return render(request, 'projects/project_detail.html', {'project': project, 'progress_percentage': progress_percentage})
+    return render(request, 'projects/project_detail.html',
+                  {'project': project, 'progress_percentage': progress_percentage})
 
+
+from django.forms import ValidationError
+
+from django.forms.utils import ErrorList
 
 @login_required
 def update_project(request, project_id):
@@ -459,7 +463,12 @@ def update_project(request, project_id):
                 if 'remove_tag' in request.POST:
                     tags_to_remove = request.POST.getlist('remove_tag')
                     for tag_id in tags_to_remove:
-                        project.tags.remove(int(tag_id))
+                        try:
+                            tag = get_object_or_404(Tag, id=int(tag_id))
+                            project.tags.remove(tag)
+                            tag.delete()  # Correctly delete the tag object
+                        except ObjectDoesNotExist:
+                            pass  # Or handle as required
 
                 # Update project images
                 if image_form.is_valid():
@@ -474,8 +483,21 @@ def update_project(request, project_id):
                     if tag_form.cleaned_data['name']:
                         tag_names = tag_form.cleaned_data['name']
                         for tag_name in tag_names:
-                            tag, _ = Tag.objects.get_or_create(name=tag_name.strip())
-                            project.tags.add(tag)
+                            tag_name_stripped = tag_name.strip()
+                            if tag_name_stripped in project.tags.values_list('name', flat=True):
+                                tag_form.add_error('name', "Tag '{}' already exists in the project.".format(tag_name_stripped))
+                            else:
+                                tag, _ = Tag.objects.get_or_create(name=tag_name_stripped)
+                                project.tags.add(tag)
+
+                if tag_form.errors:
+                    # If there are errors in the form, re-render the form with errors
+                    return render(request, 'projects/update_project.html', {
+                        'project_form': project_form,
+                        'image_form': image_form,
+                        'tag_form': tag_form,
+                        'project': project,
+                    })
 
                 return redirect('project_detail', project_id=project.id)
         except Exception as e:
@@ -503,7 +525,8 @@ def delete_project(request, project_id):
 
     # Check if the donated amount exceeds 25% of the total target
     if (project.current_amount / project.total_target) * 100 > 25:
-        return render(request, 'projects/error.html', context={'error_message': 'Donated amount exceeds 25% of total target. Deletion not allowed.'})
+        return render(request, 'projects/error.html',
+                      context={'error_message': 'Donated amount exceeds 25% of total target. Deletion not allowed.'})
 
     if request.method == 'POST':
         try:
@@ -514,14 +537,22 @@ def delete_project(request, project_id):
         return redirect('user_projects')
     return render(request, 'projects/delete_project.html', {'project': project})
 
+
 @login_required
 def user_projects(request):
     try:
         projects = Project.objects.filter(creator=request.user)
+        for project in projects:
+            if project.total_target > 0:
+                project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
+            else:
+                project.progress_percentage = 0
     except Exception as e:
         # Handle the case where an unexpected error occurs
         return render(request, 'projects/error.html', context={'error_message': str(e)})
     return render(request, 'projects/user_projects.html', {'projects': projects})
+
+
 # ========================================================================================================================
 # CRUD operations
 # ========================================================================================================================

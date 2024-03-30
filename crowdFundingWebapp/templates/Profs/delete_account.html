@@ -1,11 +1,95 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Delete Account{% endblock %}
+
+{% block title %}
+  Delete Account
+{% endblock %}
+
+{% load static %}
 
 {% block 'content' %}
-<h2>Delete Account</h2>
-<p>Are you sure you want to delete your account? This action cannot be undone.</p>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Yes, Delete My Account</button>
-</form>
-{% endblock %}
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-image: url("{% static 'images/background.jpg' %}");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center center;
+    }
+
+    .form-container {
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 30px;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .page-title {
+      font-size: 32px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+
+    .delete-msg {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #555;
+      text-align: center;
+    }
+
+    .return-btn,
+    .delete-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 16px;
+      text-decoration: none;
+      position: absolute;
+      bottom: 20px;
+    }
+
+    .return-btn {
+      background-color: #007bff;
+      color: #fff;
+      left: 20px;
+    }
+
+    .return-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+      color: #fff;
+      right: 20px;
+    }
+
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+
+  </style>
+  <div class="form-container">
+    <h2 class="page-title">Delete Account</h2>
+    <p class="delete-msg">Are you sure you want to delete your account? This action cannot be undone.</p>
+      <br>
+      <br>
+      <br>
+
+    <form method="post">
+      {% csrf_token %}
+      <a href="{% url 'view_profile' user.id %}" class="return-btn">Return</a>
+      <button type="submit" class="delete-btn">Yes, Delete My Account</button>
+    </form>
+  </div>
+{% endblock %}

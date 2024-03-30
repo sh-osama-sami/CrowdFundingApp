@@ -15,12 +15,12 @@ class Project(models.Model):
     title = models.CharField(max_length=100)
     details = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    current_amount = models.DecimalField(default=0, max_digits=10, decimal_places=2)
+    current_amount = models.DecimalField(default=0, max_digits=20, decimal_places=2)
 
     total_rating_count = models.IntegerField(default=0)
     total_rating_value = models.IntegerField(default=0)
 
-    total_target = models.DecimalField(max_digits=10, decimal_places=2)
+    total_target = models.DecimalField(max_digits=20, decimal_places=2)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     creator = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

@@ -150,6 +150,9 @@ class ProjectImageForm(forms.ModelForm):
 #
 
 class TagForm(forms.ModelForm):
+    name = forms.CharField(label='Tags', required=True, widget=forms.TextInput(
+        attrs={'placeholder': 'Enter tags separated by commas', 'maxlength': '200'}))
+
     class Meta:
         model = Tag
         fields = ['name']
@@ -188,11 +191,6 @@ class UpdateProjectImageForm(forms.ModelForm):
                 raise ValidationError("File must be an image.")
         return images
 
-    def clean_image(self):
-        images = self.cleaned_data.get('images')
-        if not images:
-            raise forms.ValidationError("Please upload at least one image.")
-        return images
 
 
 class UpdateTagForm(forms.ModelForm):
@@ -212,10 +210,7 @@ class UpdateTagForm(forms.ModelForm):
             raise ValidationError('Duplicate tags are not allowed.')
 
         # Check for duplicate tags with existing tags in the database
-        existing_tags = Tag.objects.values_list('name', flat=True)
-        duplicate_tags = set(tags).intersection(existing_tags)
-        if duplicate_tags:
-            raise ValidationError(f'The following tags already exist: {", ".join(duplicate_tags)}')
+
 
         return tags
 

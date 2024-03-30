@@ -1,22 +1,174 @@
 {% extends 'layouts/base.html' %}
 {% block title %}View Profile{% endblock %}
-
+{% load static %}
 {% block 'content' %}
-  <h2>Profile Details</h2>
-  <p><strong>First Name:</strong> {{ user.first_name }}</p>
-  <p><strong>Last Name:</strong> {{ user.last_name }}</p>
-  <p><strong>Email:</strong> {{ user.email }}</p>
-  <p><strong>Mobile Phone:</strong> {{ user.mobile_phone }}</p>
-  <p><strong>Birthdate:</strong> {{ user.birthdate }}</p>
-  <p><strong>Facebook Profile:</strong> {{ user.facebook_profile }}</p>
-  <p><strong>Country:</strong> {{ user.country }}</p>
-  {% if user.profile_picture %}
-    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" width="200">
-  {% else %}
-    <p>No profile picture available</p>
-  {% endif %}
+<style>
+  /* Add background image and opacity to the entire page */
+  body {
+    background-image: url("{% static 'images/background.jpg' %}");
+    /* Set the background image path */
+    background-size: cover;
+    /* Cover the entire background with the image */
+    background-repeat: no-repeat;
+    /* Prevent background image from repeating */
+    background-position: center center;
+    /* Center the background image */
+    opacity: 0.9;
+    /* Set the opacity for the background image */
+  }
 
+  /* Additional style for the container background */
+  .container {
+    background-color: white;
+    padding: 20px;
+    /* Add padding for better appearance */
+    border-radius: 8px;
+    /* Optional: Add border radius for rounded corners */
+  }
+
+  .profile-details {
+    display: flex;
+    align-items: flex-start;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+
+  .profile-picture img {
+    width: 550px;
+    /* Adjust the width to increase the image size */
+    /* You can keep or adjust the border-radius as needed */
+  }
+
+  .profile-picture {
+    margin-right: 20px;
+    border-radius: 20%;
+    overflow: hidden;
+    border: 10px solid orange;
+
+    /* Changed border style */
+  }
+
+  .no-profile-picture {
+    padding: 10px;
+    color: #666;
+  }
+
+  .profile-info {
+    flex: 1;
+    margin-left: 100px;
+    /* Add margin to the left side */
+    font-family: Arial, sans-serif;
+    /* Set the font family */
+    font-size: 16px;
+    /* Set the font size */
+  }
+
+  .profile-item {
+    margin-bottom: 10px;
+    color: #333;
+    /* Set the text color */
+  }
+
+  .profile-label {
+    font-weight: bold;
+    display: inline-block;
+    width: 200px;
+    color: #555;
+  }
+
+  .profile-value {
+    display: inline-block;
+    color: #333;
+    margin-left: 20px;
+    /* Add margin to the left side */
+  }
+
+  .profile-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    /* Add space between the buttons */
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    color: #fff;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+  }
+
+  .btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+  }
+
+  .btn:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+<h1 class="page-title"style="text-align: center;">Profile Details</h1>
+<div class="profile-details">
+  <div class="profile-picture">
+    {% if user.profile_picture %}
+    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" width="250">
+    <!-- Increased image size -->
+    {% else %}
+    <div class="no-profile-picture">No profile picture available</div>
+    {% endif %}
+  </div>
+  <div class="profile-info">
+    <div class="profile-item">
+      <span class="profile-label">First Name:</span>
+      <span class="profile-value">{{ user.first_name }}</span>
+    </div>
+    <div class="profile-item">
+      <span class="profile-label">Last Name:</span>
+      <span class="profile-value">{{ user.last_name }}</span>
+    </div>
+    <div class="profile-item">
+      <span class="profile-label">Email:</span>
+      <span class="profile-value">{{ user.email }}</span>
+    </div>
+    <div class="profile-item">
+      <span class="profile-label">Mobile Phone:</span>
+      <span class="profile-value">{{ user.mobile_phone }}</span>
+    </div>
+    <div class="profile-item">
+      <span class="profile-label">Birthdate:</span>
+      <span class="profile-value">{{ user.birthdate }}</span>
+    </div>
+    <div class="profile-item">
+      <span class="profile-label">Facebook Profile:</span>
+      <span class="profile-value">{{ user.facebook_profile }}</span>
+    </div>
+    <div class="profile-item">
+      <span class="profile-label">Country:</span>
+      <span class="profile-value">{{ user.country }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="profile-actions">
   <a href="{% url 'user_projects' %}" class="btn btn-primary">Show Projects</a>
-  <a href="{% url 'edit_profile' user.id  %}" class="btn btn-primary">Edit Profile</a>
-  <a href="{% url 'delete_account' user.id %}" class="btn btn-danger">Delete Account</a>
+  <div>
+    <a href="{% url 'edit_profile' user.id %}" class="btn btn-secondary">Edit Profile</a>
+    <a href="{% url 'delete_account' user.id %}" class="btn btn-danger">Delete Account</a>
+  </div>
+</div>
 {% endblock %}
