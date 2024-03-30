@@ -3,31 +3,44 @@
 {% block 'content' %}
 <style>
     .star {
-            cursor: pointer;
-            font-size: 40px;
+        cursor: pointer;
+        font-size: 40px;
+    }
+    .star.active {
+        color: gold;
+    }
+    #rating-section {
+        display: flex; 
+        align-items: center; 
+    }
+    #rating-stars {
+        margin-right: 10px; 
+    }
+    .carousel-inner .carousel-item {
+        height: 250px; 
+    }
+    .carousel-inner .carousel-item img {
+        height: 100%; 
+        width: 100%; 
+        object-fit: contain;
+        margin-left: auto; 
+        margin-right: auto;
+    }
+    .fade-in {
+        animation: fadeInAnimation ease 1s;
+        animation-fill-mode: forwards;
+        opacity: 0;
+    }
+    @keyframes fadeInAnimation {
+        0% {
+            opacity: 0;
         }
-        .star.active {
-            color: gold;
+        100% {
+            opacity: 1;
         }
-        #rating-section {
-            display: flex; 
-            align-items: center; 
-        }
-        #rating-stars {
-            margin-right: 10px; 
-        }
-        .carousel-inner .carousel-item {
-                height: 250px; 
-            }
-        .carousel-inner .carousel-item img {
-            height: 100%; 
-            width: 100%; 
-            object-fit: contain;
-            margin-left: auto; 
-            margin-right: auto;
-        }
+    }
 </style>
-<div class="container">
+<div class="container fade-in"> 
     <h2 class="text-center mb-4">Project Details</h2>
     <div class="row">
         <div class="col-md-12">
@@ -37,9 +50,9 @@
                     <div id="carousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
                             {% for image in project.images.all %}
-                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                        <img src="{{ image.image_url }}" class="d-block w-100" alt="Project Image" >
-                                    </div>
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <img src="{{ image.image_url }}" class="d-block w-100" alt="Project Image" >
+                                </div>
                             {% endfor %}
                         </div>
                         <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="prev">
@@ -76,11 +89,11 @@
                     </div>
                     <div>
                         <strong>Rating:</strong> 
-                            <div style="display: flex; align-items: center;">
+                        <div style="display: flex; align-items: center;">
                             <p>Average Rating: {{ average_rating }}</p>
-                            <span style="padding: 5px; margin-bottom: 13px; color:gold; font-size: 20px;" class="single_star">★</span>
+                            <span style="padding: 5px; margin-bottom: 13px; color:gold; font-size: 20px;" class="star">★</span>
                             <p>(no. of ratings: {{noOfRating}})</p>
-                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
