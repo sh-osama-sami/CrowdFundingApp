@@ -2,97 +2,139 @@
 {% block title %}Category Details - {{ category.name }}{% endblock %}
 {% block 'content' %}
 <style>
-    .carousel-inner .carousel-item {
-            height: 100px; 
-        }
-    .carousel-inner .carousel-item img {
-        height: 100%; 
-        width: auto; 
-        object-fit: contain;
-        margin-left: auto; 
-        margin-right: auto;
+    .project-card {
+        transition: transform 0.3s ease-in-out;
     }
-    
+
+    .project-card:hover {
+        transform: scale(1.05);
+    }
+
+    .carousel-inner .carousel-item img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .featured-icon {
+        font-size: 30px;
+        color: #f00;
+    }
+
+    .featured-text {
+        font-weight: bold;
+        color: #f00;
+    }
+
+    .progress-bar {
+        transition: width 1s ease-in-out;
+    }
+
+    .card-divider {
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 20px;
+    }
+
+    .card-divider:last-child {
+        border: none;
+        padding-bottom: 0;
+    }
+    .project-title {
+        color: #03734c; 
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
 </style>
+
 <div class="container mt-4">
-    <div class="row">
-        <div class="col">
-            <div class="text-center mb-4">
-                <h1>{{ category.name }}</h1>
-                <p>{{ category.description }}</p>
-                <p><strong>Number of Projects: </strong> {{ projects.count }}</p>
-                <p><strong>Number of Featured Projects: </strong>{{ featured_projects_count }}</p>
-                <p><strong>Average Rating: </strong>{{ average_rating }}</p>
+    <div class="card">
+        <div class="card-body">
+            <div class="row card-divider">
+                <div class="col-md-6">
+                    <h2 class="card-title text-center mb-4 project-title">Category Overview</h2>
+                    <div class="text-center mb-4">
+                        <h1>{{ category.name }}</h1>
+                        <p>{{ category.description }}</p>
+                        <p><strong>Number of Projects: </strong> {{ projects.count }}</p>
+                        <p><strong>Number of Featured Projects: </strong>{{ featured_projects_count }}</p>
+                        <p><strong>Average Rating: </strong>{{ average_rating }}</p>
+                    </div>
+                </div>
+                {% if projects %}
+                <div class="col-md-6">
+                    <h2 class="card-title text-center mb-4 project-title">Projects Overview</h2>
+                    <div class="chart-container">
+                        <canvas id="projectChart"></canvas>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-        </div>
-    </div>
-    {% if projects %}
-    <br>
-    <h2 class="text-center mb-4">Projects Overview</h2>
-            <div class="chart-container">
-                <canvas id="projectChart"></canvas>
-            </div>
-            <div class="row mt-4">
-                <h2>Projects</h2>
-                {% for project in projects %}
-                <div class="col-md-3 mb-2">
-                    <div class="project-card"         
-                     data-category="{{ project.category }}"
-                     data-status="{{ project.get_status }}"
-                     data-featured="{% if project.is_featured %}featured{% else %}not-featured{% endif %}"
-                     data-tags="{% for tag in project.tags.all %}{{ tag.name }} {% endfor %}">
-                    <div class="card">
-                        <div id="carousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                                {% for image in project.images.all %}
-                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                            <img src="{{ image.image_url }}" class="d-block w-100" alt="Project Image" >
+            {% if projects %}
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="card-title text-center mb-4 project-title">Projects</h2>
+                    <div class="row">
+                        {% for project in projects %}
+                        <div class="col-md-4 mb-2"> 
+                            <div class="project-card"         
+                                data-category="{{ project.category }}"
+                                data-status="{{ project.get_status }}"
+                                data-featured="{% if project.is_featured %}featured{% else %}not-featured{% endif %}"
+                                data-tags="{% for tag in project.tags.all %}{{ tag.name }} {% endfor %}">
+                                <div class="card">
+                                    <div id="carousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            {% for image in project.images.all %}
+                                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                                <img src="{{ image.image_url }}" class="d-block w-100" alt="Project Image">
+                                            </div>
+                                            {% endfor %}
                                         </div>
-                                {% endfor %}
-                            </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">{{ project.title }}</h5>
-                            <p class="card-subtitle my-1"><strong>Status: </strong>{{ project.get_status }}</p>
-                            <p class="card-tags"><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %} </p>
-                            {% if project.total_target > 0 %}
-                            <div class="progress">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ project.progress_percentage }}%;" aria-valuenow="{{ project.progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
-                                    <span class="progress-value">Donation: {{ project.progress_percentage }}%</span>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Next</span>
+                                        </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ project.title }}</h5>
+                                        <p class="card-subtitle my-1"><strong>Status: </strong>{{ project.get_status }}</p>
+                                        <p class="card-tags"><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %} </p>
+                                        {% if project.total_target > 0 %}
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ project.progress_percentage }}%;" aria-valuenow="{{ project.progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                                <span class="progress-value">Donation: {{ project.progress_percentage }}%</span>
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div class="progress">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                                <span class="progress-value"> Donation: 0%</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if project.is_featured %}
+                                        <div class="d-flex align-items-center">
+                                            <span class="featured-icon">&#9733;</span>
+                                            <span class="featured-text">Featured</span>
+                                        </div>
+                                        {% endif %}
+                                        <br>
+                                        <a href="{% url 'admin_project_details' project.id %}" class="btn btn-primary">View Details</a>
+                                    </div>
                                 </div>
                             </div>
-                             {% else %}   
-                            <div class="progress">
-                                <div class="progress-bar bg-danger" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                    <span class="progress-value"> Donation: 0%</span>
-                                </div>
-                            </div>
-                              {% endif %}
-                              <div class="d-flex align-items-center"> 
-                                {% if project.is_featured %}
-                                <span class="text-danger" style="font-size: 30px;">&#9733;</span>
-                                <span class="featured-text">Featured</span>
-                                {% endif %}
-                            </div>
-                            <br>
-                            <a href="{% url 'admin_project_details' project.id %}" class="btn btn-primary">View Details</a>
                         </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-                {% endfor %}
-           
+            {% endif %}
         </div>
     </div>
-    {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -104,18 +146,18 @@
     var myChart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ['Active Projects', 'Suspended Projects' , 'Reached Target Projects'],
+            labels: ['Active Projects', 'Suspended Projects', 'Reached Target Projects'],
             datasets: [{
                 label: 'Count',
                 data: [active_projects_count, suspended_projects_count, completed_projects_count],
                 backgroundColor: [
-                    'rgba(0, 0, 255, 0.5)',   
-                    'rgba(255, 0, 0, 0.5)',  
+                    'rgba(0, 0, 255, 0.5)',
+                    'rgba(255, 0, 0, 0.5)',
                     'rgba(0, 128, 0, 0.5)'
                 ],
                 borderColor: [
-                    'rgba(0, 0, 255, 1)',    
-                    'rgba(255, 0, 0, 1)', 
+                    'rgba(0, 0, 255, 1)',
+                    'rgba(255, 0, 0, 1)',
                     'rgba(0, 128, 0)'
                 ],
                 borderWidth: 1
