@@ -13,17 +13,16 @@
 
 {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% endif %}
-" role="alert">
-
-            {{ message }}
-
-        </div>
-        <div>
-            {% if message.tags == 'error' %}
-                <a href="{% url 'resend_verification_email' form.username.value %}" class="btn btn-primary">Resend Verification Email</a>
-            {% endif %}
-        </div>
+        {% if "login" in message.extra_tags %}
+            <div class="alert alert-{% if "error" in message.extra_tags %}danger{% elif "success" in message.extra_tags %}success{% endif %}" role="alert">
+                {{ message }}
+            </div>
+            <div>
+                {% if "verify" in message.extra_tags %}
+                    <a href="{% url 'resend_verification_email' form.email.value %}" class="btn btn-primary">Resend Verification Email</a>
+                {% endif %}
+            </div>
+        {% endif %}
     {% endfor %}
 {% endif %}
 

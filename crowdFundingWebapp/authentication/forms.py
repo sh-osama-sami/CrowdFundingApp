@@ -38,6 +38,22 @@ class RegistrationForm(UserCreationForm):
         return mobile_phone
 
 
+
+
+class CustomAuthenticationForm(forms.Form):
+    email = forms.EmailField(label="Email", max_length=254)
+    password = forms.CharField(label="Password", strip=False, widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        password = cleaned_data.get('password')
+
+        # You can add additional validation if needed
+
+        return cleaned_data
+
+
 class UserProfileForm(forms.ModelForm):
     password = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
     confirm_password = forms.CharField(label='Confirm Password', widget=forms.PasswordInput, required=False)

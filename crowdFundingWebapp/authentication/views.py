@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-from .forms import RegistrationForm
+from .forms import RegistrationForm, CustomAuthenticationForm
 from django.db.models import Count
 from django.utils import timezone
 
@@ -78,44 +78,77 @@ def register(request):
 #         form = AuthenticationForm()
 #     return render(request, 'registration/login.html', {'form': form})
 
+# def signin(request):
+#     try:
+#         if request.method == 'POST':
+#             form = AuthenticationForm(data=request.POST)
+#             username = request.POST.get('username')
+#             password = request.POST.get('password')
+#             user = authenticate(request, username=username, password=password)
+#             if user is not None:
+#                 if user.is_superuser==0:
+#
+#                     if user.is_active:
+#                         login(request, user)
+#                         return redirect('home')
+#                     else:
+#                         messages.error(request, 'Your account is not activated. Please verify your email.',extra_tags=["login","error"])
+#                 else:
+#                     messages.error(request, 'admin cannot login here',extra_tags=["login","error"])
+#             else:
+#                 print(user)
+#                 messages.info(request, 'Invalid username or password.',extra_tags=["login","error"])
+#         else:
+#             form = AuthenticationForm()
+#     except ObjectDoesNotExist:
+#         return render(request, 'Project/error_page.html', {'error_message': 'An error occurred during login.'})
+#     return render(request, 'registration/login.html', {'form': form})
+
 
 def signin(request):
     try:
         if request.method == 'POST':
-            form = AuthenticationForm(data=request.POST)
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                if user.is_superuser==0:
+            form = CustomAuthenticationForm(data=request.POST)
 
-                    if user.is_active:
-                        login(request, user)
-                        return redirect('home')
+            if form.is_valid():
+                email = form.cleaned_data.get('email')
+                password = form.cleaned_data.get('password')
+
+                try:
+                    user = CustomUser.objects.get(email=email)
+                except CustomUser.DoesNotExist:
+                    messages.info(request, 'Invalid Email.', extra_tags=["login", "error"])
+                    return render(request, 'registration/login.html', {'form': form})
+
+                user = authenticate(request, username=user.username, password=password)
+
+                if user is not None:
+                    if not user.is_superuser:
+                        if user.is_active:
+                            login(request, user)
+                            return redirect('home')
+                        else:
+                            messages.error(request, 'Your account is not activated. Please verify your email.',
+                                           extra_tags=["login", "error", "verify"])
                     else:
-                        messages.error(request, 'Your account is not activated. Please verify your email.')
+                        messages.error(request, 'admin cannot login here', extra_tags=["login", "error"])
                 else:
-                    messages.error(request, 'admin cannot login here')
-            else:
-                print(user)
-                messages.info(request, 'Invalid username or password.')
+                    messages.info(request, 'Invalid password.', extra_tags=["login", "error"])
         else:
-            form = AuthenticationForm()
+            form = CustomAuthenticationForm()
     except ObjectDoesNotExist:
         return render(request, 'Project/error_page.html', {'error_message': 'An error occurred during login.'})
     return render(request, 'registration/login.html', {'form': form})
 
-
-def resend_verification_email(request, username):
+def resend_verification_email(request, email):
     try:
-        user = User.objects.get(username=username)
+        user = User.objects.get(email=email)
         print(user)
         verification_email(request, user)
-        messages.success(request, 'A verification email has been sent to your email address. Please verify your email.')
+        messages.success(request, 'A verification email has been sent to your email address. Please verify your email.',extra_tags=["login","success"])
     except ObjectDoesNotExist:
-        messages.error(request, 'User does not exist.')
+        messages.error(request, 'User does not exist.',extra_tags=["login","error"])
     return redirect('login')  # Redirect to the same page to display the message
-
 
 def verification_email(request, user):
     try:

@@ -257,41 +257,41 @@
 
 
             {% if user.is_authenticated %}
-            {% if is_reported %}
-            {% if user_has_reported %}
-            <div class="alert alert-danger" role="alert">
-                This project has been reported. We are reviewing it. Thank you for your feedback.
-            </div>
-            {% else %}
-
-            <!-- Report Button and Form -->
-            <button id="reportButton" class="btn btn-danger" style="margin-top: 10px;">Report Project</button>
-            <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
-                {% csrf_token %}
-                <div id="reasonField" style="display: none;">
-                    <div class="mb-3">
-                        <label for="reason" class="form-label">Enter reason for reporting:</label>
-                        <input type="text" name="reason" id="reason" class="form-control" placeholder="Enter reason" required>
+            {% if project.creator_id != user.id %}
+                {% if is_reported %}
+                    {% if user_has_reported %}
+                    <div class="alert alert-danger" role="alert">
+                        This project has been reported. We are reviewing it. Thank you for your feedback.
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit Reason</button>
-                </div>
-            </form>
-            {% endif %}
-            {% else %}
+                    {% else %}
+                    <!-- Report Button and Form -->
+                    <button id="reportButton" class="btn btn-danger" style="margin-top: 10px;">Report Project</button>
+                    <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
+                        {% csrf_token %}
+                        <div id="reasonField" style="display: none;">
+                            <div class="mb-3">
+                                <label for="reason" class="form-label">Enter reason for reporting:</label>
+                                <input type="text" name="reason" id="reason" class="form-control" placeholder="Enter reason" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Reason</button>
+                        </div>
+                    </form>
+                    {% endif %}
+                {% else %}
 
-            <!-- Report Button and Form -->
-            <button id="reportButton" class="btn btn-danger">Report Project</button>
-            <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
-                {% csrf_token %}
-                <div id="reasonField" style="display: none;">
-                    <div class="mb-3">
-                        <label for="reason" class="form-label">Enter reason for reporting:</label>
-                        <input type="text" name="reason" id="reason" class="form-control" placeholder="Enter reason" required>
+                <!-- Report Button and Form -->
+                <button id="reportButton" class="btn btn-danger">Report Project</button>
+                <form id="reportForm" method="post" action="{% url 'report_project' pk=project.id %}">
+                    {% csrf_token %}
+                    <div id="reasonField" style="display: none;">
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Enter reason for reporting:</label>
+                            <input type="text" name="reason" id="reason" class="form-control" placeholder="Enter reason" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Reason</button>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit Reason</button>
-                </div>
-            </form>
-            {% endif %}
+                </form>
+                {% endif %}
 
             <!-- Display stars for rating -->
             <p style="margin-bottom: 0;">your rating:</p>
@@ -311,6 +311,8 @@
                     <button type="submit" id="rating-button">Rate</button>
                 </form>
             </div>
+            {% endif %}
+
         {% else %}
             <div class="alert alert-warning" role="alert">
                 You must be logged in to rate/report this project. Please <a href="{% url 'login' %}">log in</a>
