@@ -1,24 +1,24 @@
 {% extends 'layouts/admin_base.html' %}
 {% block title %}Administration - CrowdFunding WebApp{% endblock %}
 {% block 'content' %}
-<div class="container">
-    <h2 class="text-center mb-4">Reported Project Details</h2>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
+<div class="container project-container">
+    <h2 class="text-center mb-4" style="color: #03734c; font-weight: bold;">Reported Project Details</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card project-details-card">
                 <div class="card-body">
-                    <h4 class="text-center mb-4">{{ project.title }}</h4>
-                    <p class="card-subtitle my-1"><strong>Category:</strong> {{ project.category.name }}</p>
-                    <p class="card-subtitle my-1"><strong>Status: </strong>{{ project.get_status }}</p>
-                    <p class="card-subtitle my-1"><strong>Project Owner: </strong>{{ project.creator }}</p>
-                    <p class="card-subtitle my-1"><strong>Amount: </strong> {{ project.current_amount }}</p>
-                    <p class="card-subtitle my-1"><strong>Target: </strong> {{ project.total_target }}</p>
-                    <p class="card-subtitle my-1"><strong>Time: </strong> {{ project.start_time }}</p>
-                    <p class="card-subtitle my-1"><strong>Tags:</strong> {% for tag in project.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %} </p>
-                    <p class="card-subtitle my-1"><strong>Number of Reports: </strong>{{ project.reports.count }}</p><br>
-                    
-                    <h6 class="card-subtitle mb-2 text-muted">Reports:</h6>
-                    <ul class="list-group">
+                    <h4 class="card-title text-center mb-4">{{ project.title }}</h4>
+                    <div class="card-text">
+                        <p><strong>Category:</strong> {{ project.category.name }}</p>
+                        <p><strong>Status:</strong> {{ project.get_status }}</p>
+                        <p><strong>Project Owner:</strong> {{ project.creator }}</p>
+                        <p><strong>Current Donation:</strong> {{ project.current_amount }} %</p>
+                        <p><strong>Created At:</strong> {{ project.start_time }}</p>
+                        <p><strong>Number of Reports:</strong> {{ project.reports.count }}</p>
+                    </div>
+                    <hr>
+                    <h6 class="card-subtitle mb-2 text-muted" style="font-weight: bold;">Reports:</h6>
+                    <ul class="list-group report-list">
                         {% for report in project.reports.all %}
                         <li class="list-group-item">
                             <strong>Username:</strong> {{ report.user.username }}<br>
@@ -28,15 +28,70 @@
                         {% endfor %}
                     </ul>
                 </div>
-                <div class="text-center">
+                <div class="text-center mt-4">
                     {% if project.get_status == 'Active' %}
-                    <a href="{% url 'admin_suspend_project' project.id %}" class="btn btn-warning">Suspend Project</a>
+                    <a href="{% url 'admin_suspend_project' project.id %}" class="btn btn-warning mr-3">Suspend Project</a>
                     {% endif %}
-                    <a href="{% url 'admin_delete_project' project.id %}" class="btn btn-danger">Delete Project</a>
+                    <a href="{% url 'admin_delete_project' project.id %}" class="btn btn-danger mr-3">Delete Project</a>
                     <a href="{% url 'admin_ignore_reports' project.id %}" class="btn btn-primary">Ignore Reports</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .project-details-card {
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    .card-text p {
+        margin-bottom: 10px;
+    }
+
+    .list-group-item {
+        border: none;
+    }
+
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .project-details-card .btn {
+        margin-top: 20px;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(10%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .project-details-card {
+        animation: fadeIn 1s forwards;
+        opacity: 0;
+    }
+</style>
 {% endblock %}
