@@ -121,6 +121,7 @@ def report_details_admin(request,project_id):
             project = get_object_or_404(Project, id=project_id)
             reports = project.reports.all()
             tags = project.tags.all()
+            project.current_amount = round((project.current_amount / project.total_target) * 100, 2)
             return render(request, 'admin/admin_report_details.html', {'project': project, 'reports': reports , 'tags':tags})
     except Exception as e:
         return render(request, 'admin/admin_errors.html', {'error_message': str(e)})
