@@ -214,6 +214,7 @@
             <!-- Donation Form Section -->
             {% if user.is_authenticated %}
             {% if project.get_status == 'Active' %}
+            {% if project.creator is not user %}
                 <div class="col-md-4 text-md">
                     <button type="button" id="donateButton" class="btn btn-success">Donate</button>
                 </div>
@@ -228,6 +229,7 @@
                     <div id="messageContainer"></div>
                 </div>
             {% endif %}
+            {% else %}
             {% if project.get_status == 'Suspended' %}
             <div class="alert alert-warning" role="alert">
                 This project is Suspended Now! You can't Donate to it .
@@ -237,6 +239,7 @@
             <div class="alert alert-success" role="alert">
                 This project already reached Target! You can't Donate to it .
             </div>
+            {% endif %}
             {% endif %}
         {% else %}
             <div class="alert alert-warning" role="alert">
