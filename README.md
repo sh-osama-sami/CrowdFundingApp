@@ -78,7 +78,7 @@ CrowdFunding WebApp is a full-stack web application developed using the Django f
 
 - **Django:** A high-level Python web framework for rapid development, clean design, and scalability.
 - **Python:** The primary programming language used for backend logic, data processing, and server-side operations.
-- **SQLite:** A lightweight relational database management system used for storing project data, user information, and session management.
+- **Mysql:** A relational database management system used for storing project data, user information, and session management.
 - **Django REST Framework (DRF):** Used for building RESTful APIs to support frontend interactions, data retrieval, and AJAX requests.
 - **Celery:** An asynchronous task queue for handling background tasks, scheduled jobs, and processing heavy computations.
 - **Redis:** In-memory data structure store used as a message broker for Celery and caching system for performance optimization.
