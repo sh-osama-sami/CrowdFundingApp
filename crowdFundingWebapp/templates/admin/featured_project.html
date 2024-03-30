@@ -3,14 +3,13 @@
 {% block 'content' %}
 <style>
     .carousel-inner .carousel-item {
-            height: 100px; 
-        }
+        height: 150px;
+    }
     .carousel-inner .carousel-item img {
-        height: 100%; 
-        width: auto; 
-        object-fit: contain;
-        margin-left: auto; 
-        margin-right: auto;
+        height: 100%;
+        width: auto;
+        object-fit: cover; 
+        margin: 0 auto; 
     }
     .input-group {
         position: relative;
@@ -23,7 +22,7 @@
     select {
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
-        background-color:white;
+        background-color: white;
         border: none;
         margin-right: 10px;
         font-size: 18px;
@@ -36,7 +35,12 @@
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
     }
-    
+    .project-card {
+        transition: transform 0.3s ease-in-out;
+    }
+    .project-card:hover {
+        transform: scale(1.05); 
+    }
 </style>
 <div class="container mt-4">
     <div class="row justify-content-between align-items-center">
@@ -69,9 +73,9 @@
                 <div id="carousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-inner">
                         {% for image in project.images.all %}
-                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                    <img src="{{ image.image_url }}" class="d-block w-100" alt="Project Image" >
-                                </div>
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img src="{{ image.image_url }}" class="d-block w-100" alt="Project Image" >
+                            </div>
                         {% endfor %}
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ project.id }}" data-bs-slide="prev">
@@ -93,15 +97,15 @@
                             <span class="progress-value">Donation: {{ project.progress_percentage }}%</span>
                         </div>
                     </div>
-                     {% else %}   
+                    {% else %}   
                     <div class="progress">
                         <div class="progress-bar bg-danger" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                             <span class="progress-value"> Donation: 0%</span>
                         </div>
                     </div>
-                      {% endif %}
+                    {% endif %}
 
-                      {% if project.get_status == 'Active' %}
+                    {% if project.get_status == 'Active' %}
                     <div class="d-flex align-items-center"> 
                         <button class="btn btn-transparent favorite-btn {% if project.is_featured %}text-danger{% endif %}" data-project-id="{{ project.id }}" data-update-url="{% url 'update_featured_status' project.id %}" style="font-size: 30px;">
                             {% if project.is_featured %}
@@ -130,79 +134,78 @@ document.addEventListener("DOMContentLoaded", function() {
     const projectList = document.getElementById('projectList'); 
 
     function applyFilters() {
-            const searchText = searchInput.value.toLowerCase();
-            const searchBy = document.getElementById('searchBy').value;
-            const filterBy = filterBySelect.value;
-            const projects = projectList.querySelectorAll('.project-card');
+        const searchText = searchInput.value.toLowerCase();
+        const searchBy = document.getElementById('searchBy').value;
+        const filterBy = filterBySelect.value;
+        const projects = projectList.querySelectorAll('.project-card');
 
-            projects.forEach(function(project) {
-                let searchTarget = '';
-                let display = 'block';  
+        projects.forEach(function(project) {
+            let searchTarget = '';
+            let display = 'block';  
 
-                if (searchBy === 'name') {
-                    searchTarget = project.querySelector('.card-title').textContent.toLowerCase();
-                } else if (searchBy === 'tag') {
-                    searchTarget = project.querySelector('.card-tags').textContent.toLowerCase();
-                }
+            if (searchBy === 'name') {
+                searchTarget = project.querySelector('.card-title').textContent.toLowerCase();
+            } else if (searchBy === 'tag') {
+                searchTarget = project.querySelector('.card-tags').textContent.toLowerCase();
+            }
 
-                if (!searchTarget.includes(searchText)) {
+            if (!searchTarget.includes(searchText)) {
+                display = 'none'; 
+            }
+
+            if (filterBy !== 'all') {
+                const category = project.getAttribute('data-category');
+                const status = project.getAttribute('data-status');
+                const featured = project.getAttribute('data-featured');
+
+                if ((filterBy === 'featured' && featured !== 'featured') ||
+                    (filterBy === 'non-featured' && featured !== 'not-featured') ||
+                    (filterBy === 'reached-target' && project.querySelector('.progress-bar').style.width !== '100%') ||
+                    (filterBy === 'suspended' && status !== 'Suspended') ||
+                    (filterBy === 'active' && status !== 'Active')) {
                     display = 'none'; 
                 }
+            }
+            project.style.display = display;
+        });
+    }
 
-                if (filterBy !== 'all') {
-                    const category = project.getAttribute('data-category');
-                    const status = project.getAttribute('data-status');
-                    const featured = project.getAttribute('data-featured');
-
-                    if ((filterBy === 'featured' && featured !== 'featured') ||
-                        (filterBy === 'non-featured' && featured !== 'not-featured') ||
-                        (filterBy === 'reached-target' && project.querySelector('.progress-bar').style.width !== '100%') ||
-                        (filterBy === 'suspended' && status !== 'Suspended') ||
-                        (filterBy === 'active' && status !== 'Active')) {
-                        display = 'none'; 
-                    }
-                }
-                project.style.display = display;
-            });
-        }
-
-        searchInput.addEventListener('input', applyFilters); 
-        filterBySelect.addEventListener('change', applyFilters);
+    searchInput.addEventListener('input', applyFilters); 
+    filterBySelect.addEventListener('change', applyFilters);
 
     document.querySelectorAll('.favorite-btn').forEach(function(button) {
-            button.addEventListener('click', function() {
-                const url = this.getAttribute('data-update-url');
-                const projectId = this.getAttribute('data-project-id');
-                const markAsFeaturedText = this.parentElement.querySelector('span');
-                
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}' 
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if(data.success){
-                        button.classList.toggle('text-danger');
-                        if (markAsFeaturedText) {
-                    markAsFeaturedText.classList.toggle('d-none');
+        button.addEventListener('click', function() {
+            const url = this.getAttribute('data-update-url');
+            const projectId = this.getAttribute('data-project-id');
+            const markAsFeaturedText = this.parentElement.querySelector('span');
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' 
                 }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(data.success){
+                    button.classList.toggle('text-danger');
+                    if (markAsFeaturedText) {
+                        markAsFeaturedText.classList.toggle('d-none');
                     }
-                })
-                .catch(error => {
-                    alert('You cannot select more than 5 projects as featured.');
-                });
+                }
+            })
+            .catch(error => {
+                alert('You cannot select more than 5 projects as featured.');
             });
         });
     });
+});
 </script>
 
 {% endblock %}
-
