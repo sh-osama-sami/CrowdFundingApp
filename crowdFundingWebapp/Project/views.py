@@ -686,7 +686,7 @@ def category_projects(request, category_id):
         projects = Project.objects.filter(category=category)
     except ObjectDoesNotExist:
         return render(request, 'Project/error_page.html', {'error_message': 'Category not found.'})
-    return render(request, 'category/category_projects.html', {'projects': projects})
+    return render(request, 'category/category_projects.html', {'projects': projects,'category':category})
 
 
 def custom_404_view(request, exception):

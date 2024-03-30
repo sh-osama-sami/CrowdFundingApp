@@ -43,14 +43,14 @@ body {
 
 .container {
     flex: 1;
-    margin-bottom: 200px;
+    margin-bottom: 100px;
 }
 
-footer {
+/* footer {
     position: fixed;
     bottom: 0;
     width: 100%;
     background-color: #e78696;
     padding: 10px 0;
     text-align: center;
-}
+} */
