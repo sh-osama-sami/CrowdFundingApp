@@ -214,7 +214,7 @@
             <!-- Donation Form Section -->
             {% if user.is_authenticated %}
             {% if project.get_status == 'Active' %}
-            {% if project.creator is not user %}
+            {% if project.creator_id != user.id %}
                 <div class="col-md-4 text-md">
                     <button type="button" id="donateButton" class="btn btn-success">Donate</button>
                 </div>
