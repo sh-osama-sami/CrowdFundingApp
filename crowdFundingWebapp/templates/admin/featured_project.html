@@ -105,7 +105,8 @@
                     <div class="d-flex align-items-center"> 
                         <button class="btn btn-transparent favorite-btn {% if project.is_featured %}text-danger{% endif %}" data-project-id="{{ project.id }}" data-update-url="{% url 'update_featured_status' project.id %}" style="font-size: 30px;">
                             {% if project.is_featured %}
-                            &#9733; 
+                            <span class="text-danger" style="font-size: 30px;">&#9733;</span>
+                            <span class="featured-text">Featured</span>
                             {% else %}
                             &#9734; 
                             {% endif %}

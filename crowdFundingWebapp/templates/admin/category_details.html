@@ -17,14 +17,17 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col">
-            <h1>{{ category.name }}</h1>
-            <p>{{ category.description }}</p>
-            <p>Number of Projects: {{ projects.count }}</p>
-            <p>Number of Featured Projects: {{ featured_projects_count }}</p>
-            <p>Average Rating: {{ average_rating }}</p>
+            <div class="text-center mb-4">
+                <h1>{{ category.name }}</h1>
+                <p>{{ category.description }}</p>
+                <p><strong>Number of Projects: </strong> {{ projects.count }}</p>
+                <p><strong>Number of Featured Projects: </strong>{{ featured_projects_count }}</p>
+                <p><strong>Average Rating: </strong>{{ average_rating }}</p>
+            </div>
         </div>
     </div>
     {% if projects %}
+    <br>
     <h2 class="text-center mb-4">Projects Overview</h2>
             <div class="chart-container">
                 <canvas id="projectChart"></canvas>
@@ -75,7 +78,7 @@
                               {% endif %}
                               <div class="d-flex align-items-center"> 
                                 {% if project.is_featured %}
-                                <span class="text-danger" style="font-size: 30px;">&#9733;</span> <!-- Star icon for featured project -->
+                                <span class="text-danger" style="font-size: 30px;">&#9733;</span>
                                 <span class="featured-text">Featured</span>
                                 {% endif %}
                             </div>

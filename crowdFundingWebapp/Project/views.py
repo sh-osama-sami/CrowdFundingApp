@@ -45,12 +45,16 @@ def categoryDetails(request, category_id):
     try:
         if request.user.is_authenticated and request.user.is_superuser:
             category = get_object_or_404(Category, pk=category_id)
-            projects = category.project_set.all()
+            projects = category.project_set.all()           
             featured_projects_count = projects.filter(is_featured=True).count()
             active_projects_count = 0
             suspended_projects_count = 0
             completed_projects_count = 0
             for project in projects:
+                if project.total_target > 0:
+                    project.progress_percentage = round((project.current_amount / project.total_target) * 100, 2)
+                else:
+                    project.progress_percentage = 0
                 status = project.get_status()
                 if status == "Active":
                     active_projects_count += 1
@@ -555,6 +559,9 @@ def donate(request, pk):
                 try:
                     form.save(project)
                     success_message = f'Thank you for your donation of ${form.cleaned_data["donation_amount"]}.'
+                    if project.is_featured :
+                        project.is_featured = 0
+                        project.save()
                     return JsonResponse({'success': True, 'success_message': success_message})
                 except forms.ValidationError as e:
                     errors = {'detail': str(e)}
