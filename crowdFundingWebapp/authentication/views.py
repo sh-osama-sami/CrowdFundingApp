@@ -173,6 +173,8 @@ def admin_login(request):
                 if user is not None:
                     login(request, user)
                     return redirect('admin_home')
+                else:
+                    form.add_error(None, "Invalid username or password")
         else:
             form = AuthenticationForm()
     except Exception as e:
