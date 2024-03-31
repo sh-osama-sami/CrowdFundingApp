@@ -136,8 +136,6 @@ Follow these steps to set up and run the CrowdFunding WebApp project on your loc
    ```
 
 6. Create a superuser for admin access
-
-:
    ```bash
    python manage.py createsuperuser
    ```
