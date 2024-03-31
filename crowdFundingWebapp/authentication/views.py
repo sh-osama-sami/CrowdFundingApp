@@ -42,7 +42,7 @@ def register(request):
                 user.save()
                 verification_email(request, user)
                 messages.success(request,
-                                 'A verification email has been sent to your email address. Please verify your email.')
+                                 'A verification email has been sent to your email address. Please verify your email.', extra_tags=["login", "success"])
                 return redirect('login')  # Redirect to the same page to display the message
         else:
             form = RegistrationForm()
@@ -128,8 +128,7 @@ def signin(request):
                             login(request, user)
                             return redirect('home')
                         else:
-                            messages.error(request, 'Your account is not activated. Please verify your email.',
-                                           extra_tags=["login", "error", "verify"])
+                            messages.error(request, 'Your account is not activated. Please verify your email.', extra_tags=["login", "error"])
                     else:
                         messages.error(request, 'admin cannot login here', extra_tags=["login", "error"])
                 else:
@@ -138,7 +137,7 @@ def signin(request):
             form = CustomAuthenticationForm()
     except ObjectDoesNotExist:
         return render(request, 'Project/error_page.html', {'error_message': 'An error occurred during login.'})
-    return render(request, 'registration/login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form,'email':request.GET.get('email' )})
 
 def resend_verification_email(request, email):
     try:
@@ -172,14 +171,18 @@ def generate_verification_token(user_id):
 
 
 def verify_email(request, user_id, token):
-    user = CustomUser.objects.get(pk=user_id)
-    if check_verification_token(user_id, token):
-        user.is_active = True
-        user.save()
-        messages.success(request, 'Your email has been verified. Please login.')
-    else:
-        messages.error(request, 'expired verification link.')
-    return redirect('login')
+    try:
+        user = CustomUser.objects.get(pk=user_id)
+        if check_verification_token(user_id, token):
+            user.is_active = True
+            user.save()
+            messages.success(request, 'Your email has been verified. Please login.',extra_tags=["login","success"])
+        else:
+            messages.error(request, 'expired verification link.',extra_tags=["login", "error", "verify"])
+        return redirect(reverse('login') + f'?email={user.email}')
+    except ObjectDoesNotExist:
+        return render(request, 'Project/error_page.html',
+                      {'error_message': 'An error occurred during email verification.'})
 
 
 def check_verification_token(user_id, token):
@@ -231,7 +234,7 @@ def admin_home(request):
                     suspended_projects_count += 1
                 elif status == "Reached Target":
                     completed_projects_count += 1
-                    
+
             reported_projects = Project.objects.filter(is_reported=True).annotate(report_count=Count('reports'))
             return render(request, 'admin/admin_home.html', {'active_projects_count': active_projects_count,
                                                             'suspended_projects_count': suspended_projects_count,

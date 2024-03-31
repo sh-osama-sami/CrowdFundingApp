@@ -47,7 +47,7 @@
 .projects-container {
     display: flex; /* Use flexbox layout */
     flex-wrap: wrap; /* Allow items to wrap to the next line */
-    justify-content: space-between; /* Distribute items evenly with space between them */
+    justify-content: center; /* Distribute items evenly with space between them */
       align-items: flex-start; /* Align items to the top of the container */
 }
 
