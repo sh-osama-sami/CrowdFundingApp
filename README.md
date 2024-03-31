@@ -213,11 +213,11 @@ Contributions to the CrowdFunding WebApp project are highly encouraged and appre
 
 The CrowdFunding WebApp project was developed by a team of five members, each contributing to different aspects of the project:
 
-1. 
-2. 
-3. 
-4. 
-5. 
+1. **Alaa Mohamed Abdel Hamid** - [@AlaaGomaa178](https://github.com/AlaaGomaa178)
+2. **Alaa Walid Alshitany** - [@alaa-alshitany](https://github.com/alaa-alshitany)
+3. **Lina Ahmed El-duhemy** - [@linaelduhemy](https://github.com/linaelduhemy)
+4. **Mohamed Hassan** - [@ember52](https://github.com/ember52)
+5. **Sherry Osama** - [@sh-osama-sami](https://github.com/sh-osama-sami)
 
 ## License
 
